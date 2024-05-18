@@ -22,7 +22,7 @@ import java.util.Map;
 
 /**
  * API 评分接口
- * @author jitwxs
+ * @author Kyle
  * @date 2019年05月04日 10:15
  */
 @RestController
@@ -33,7 +33,7 @@ public class EvaluateApiController {
 
     /**
      * 订单评分
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/5/4 10:18
      */
     @PostMapping("/order/{orderId}")
@@ -57,7 +57,7 @@ public class EvaluateApiController {
 
     /**
      * 分页个人评价列表
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/5/4 12:19
      */
     @GetMapping("/list")
@@ -108,7 +108,7 @@ public class EvaluateApiController {
 
     /**
      * 获取评分，取值0~10，三位小数
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/5/4 10:21
      */
     private double getScore(String score) {

@@ -19,7 +19,7 @@ public class JsonUtils {
 
     /**
      * 对象-->Json字符串
-     * @author jitwxs
+     * @author Kyle
      * @version 创建时间：2018年4月17日 下午3:39:35
      */
     public static String objectToJson(Object data) {
@@ -33,7 +33,7 @@ public class JsonUtils {
 
     /**
      * Json字符串-->对象
-     * @author jitwxs
+     * @author Kyle
      * @version 创建时间：2018年4月17日 下午3:39:45
      */
     public static <T> T jsonToObject(String jsonData, Class<T> beanType) {
@@ -47,7 +47,7 @@ public class JsonUtils {
 
     /**
      * Json字符串--> List<对象>
-     * @author jitwxs
+     * @author Kyle
      * @version 创建时间：2018年4月17日 下午3:40:09
      */
     public static <T> List<T> jsonToList(String jsonData, Class<T> beanType) {

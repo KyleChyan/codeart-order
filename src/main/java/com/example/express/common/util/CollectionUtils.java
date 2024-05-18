@@ -10,7 +10,7 @@ public class CollectionUtils {
     /**
      * 获取集合第一个元素
      * 如果不存在，返回null
-     * @author jitwxs
+     * @author Kyle
      * @since 2018/6/27 14:44
      */
     public static <T> T getListFirst(List<T> list) {
@@ -27,7 +27,7 @@ public class CollectionUtils {
 
     /**
      * 判断数组是否为空
-     * @author jitwxs
+     * @author Kyle
      * @since 2018/7/7 15:00
      */
     public static boolean isArrayEmpty(String[] strings) {
@@ -44,7 +44,7 @@ public class CollectionUtils {
 
     /**
      * 字符串 --> 字符串数组
-     * @author jitwxs
+     * @author Kyle
      * @since 2018/7/16 9:47
      */
     public static String[] str2Array(String str, String split) {

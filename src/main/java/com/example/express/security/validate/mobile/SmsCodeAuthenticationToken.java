@@ -8,7 +8,7 @@ import java.util.Collection;
 
 /**
  * 短信登录 AuthenticationToken，模仿 UsernamePasswordAuthenticationToken 实现
- * @author jitwxs
+ * @author Kyle
  * @since 2019/1/9 13:47
  */
 public class SmsCodeAuthenticationToken extends AbstractAuthenticationToken {

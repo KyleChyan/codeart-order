@@ -7,22 +7,24 @@ import com.example.express.common.constant.SessionKeyConstant;
 import com.example.express.common.util.JsonUtils;
 import com.example.express.config.AliPayConfig;
 import com.example.express.domain.ResponseResult;
+import com.example.express.domain.bean.Order;
 import com.example.express.domain.bean.OrderInfo;
 import com.example.express.domain.bean.SysUser;
 import com.example.express.domain.enums.PaymentStatusEnum;
 import com.example.express.domain.enums.ResponseErrorCodeEnum;
+import com.example.express.domain.vo.req.OrderInsertReq;
+import com.example.express.domain.vo.req.OrderItemReq;
 import com.example.express.exception.CustomException;
 import com.example.express.service.OrderInfoService;
 import com.example.express.service.OrderPaymentService;
+import com.example.express.service.OrderService;
 import com.example.express.service.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -30,16 +32,17 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
  * 订单
- * @author jitwxs
+ * @author Kyle
  * @date 2019年04月23日 0:25
  */
 @Controller
 @RequestMapping("/order")
-@PreAuthorize("hasRole('ROLE_USER')")
+//@PreAuthorize("hasRole('ROLE_USER')")
 public class OrderController {
     @Autowired
     private AliPayConfig aliPayConfig;
@@ -52,10 +55,34 @@ public class OrderController {
     @Autowired
     private OrderPaymentService paymentService;
 
+    @Autowired
+    private OrderService orderService;
+
+
+    /**
+     * 提交订单
+     * @param req
+     * @author Kyle
+     * @since 2018/5/14 8:53
+     */
+    @PostMapping("/sub")
+    public String subOrder(OrderInsertReq req, @AuthenticationPrincipal SysUser sysUser) throws IOException {
+//        OrderInsertReq req = (OrderInsertReq)session.getAttribute(SessionKeyConstant.SESSION_LATEST_EXPRESS);
+//        req.setExtraPrice(10.00);
+        System.out.println(req);
+        req.setTotalPrice(25.00);
+        // 生成订单 & 订单支付
+        ResponseResult result1 = orderService.insertOrder(req,sysUser.getId());
+        if(result1.getCode() != ResponseErrorCodeEnum.SUCCESS.getCode()) {
+            throw new CustomException(result1);
+        }
+        System.out.println("我得到的ResponseResult是："+result1.getData());
+        return result1.getMsg();
+    }
     /**
      * 支付宝支付方式
      * @param money 支付金额
-     * @author jitwxs
+     * @author Kyle
      * @since 2018/5/14 8:53
      */
     @PostMapping("/alipay")
@@ -161,7 +188,7 @@ public class OrderController {
      * 如果执行页面跳转，支付宝会收不到success字符，会被支付宝服务器判定为该页面程序运行出现异常，而重发处理结果通知
      * （3）cookies、session等在此页面会失效，即无法获取这些数据
      * （4）该方式的调试与运行必须在服务器上，即互联网上能访问 *
-     * @author jitwxs
+     * @author Kyle
      * @since 2018/6/4 14:45
      */
     @PostMapping("/alipay/notify")
@@ -227,7 +254,7 @@ public class OrderController {
 
     /**
      * 获取支付参数
-     * @author jitwxs
+     * @author Kyle
      * @since 2018/6/4 16:39
      */
     private Map<String,String> getPayParams(HttpServletRequest request) {

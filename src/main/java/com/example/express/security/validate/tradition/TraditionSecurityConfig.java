@@ -19,7 +19,7 @@ import javax.sql.DataSource;
 
 /**
  * 验证码登陆相关安全设置
- * @author jitwxs
+ * @author Kyle
  * @since 2019/1/8 23:58
  */
 @Component

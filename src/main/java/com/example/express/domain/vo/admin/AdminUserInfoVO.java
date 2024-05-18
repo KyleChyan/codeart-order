@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 /**
  * 用户信息VO，管理员用
- * @author jitwxs
+ * @author Kyle
  * @date 2019年05月02日 12:29
  */
 @Data

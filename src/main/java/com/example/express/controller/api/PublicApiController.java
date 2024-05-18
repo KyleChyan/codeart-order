@@ -20,7 +20,7 @@ import java.util.List;
 
 /**
  * API公开信息
- * @author jitwxs
+ * @author Kyle
  * @date 2019年04月21日 23:01
  */
 @RestController
@@ -37,7 +37,7 @@ public class PublicApiController {
 
     /**
      * 根据父ID查询行政区划
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/21 23:32
      * @param id 父ID
      */
@@ -55,7 +55,7 @@ public class PublicApiController {
 
     /**
      * 根据省份ID查询学校
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/21 23:32
      * @param id 省份ID
      */

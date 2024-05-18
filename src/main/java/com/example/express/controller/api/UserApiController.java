@@ -23,7 +23,7 @@ import java.util.Map;
 
 /**
  * 用户信息 API Controller
- * @author jitwxs
+ * @author Kyle
  * @date 2019年05月02日 12:18
  */
 @RestController
@@ -41,7 +41,7 @@ public class UserApiController {
      * @param isThird 是否绑定三方登录
      * @param username 用户名
      * @param tel 手机号
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/5/2 12:24
      */
     @GetMapping("/list")
@@ -95,7 +95,7 @@ public class UserApiController {
 
     /**
      * 获取配送员列表
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/5/3 21:58
      */
     @GetMapping("/courier-list")
@@ -121,7 +121,7 @@ public class UserApiController {
      * 改变用户状态
      * @param type 1. 禁用；2：启用；3：冻结；4：解冻
      * @param hour 冻结小时数
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/5/2 13:50
      */
     @PostMapping("/{id}/status")

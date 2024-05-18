@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 /**
  * 用户评分表
- * @author jitwxs
+ * @author Kyle
  * @date 2019年05月03日 23:47
  */
 @Data

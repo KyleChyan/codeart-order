@@ -4,6 +4,8 @@ import com.example.express.domain.bean.DataArea;
 import com.example.express.domain.bean.DataCompany;
 import com.example.express.domain.bean.DataSchool;
 import com.example.express.domain.bean.UserEvaluate;
+import com.example.express.domain.enums.NewOrderStatusEnum;
+import com.example.express.domain.enums.PlatformsEnum;
 import com.example.express.service.DataAreaService;
 import com.example.express.service.DataCompanyService;
 import com.example.express.service.DataSchoolService;
@@ -12,9 +14,12 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 

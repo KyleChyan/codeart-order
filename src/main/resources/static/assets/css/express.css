@@ -24,6 +24,10 @@
     color:red;
 }
 
+.input-width {
+    width: 200px; /* 设置输入框的宽度为200像素 */
+}
+
 /* jquery validate 验证 */
 input.error { border: 1px solid red; }
 textarea.error { border: 1px solid red; }
@@ -36,3 +40,5 @@ label.error {
 
     color: #EA5200;
 }
+
+/*加急按钮*/

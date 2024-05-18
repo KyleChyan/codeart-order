@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * API支付接口
- * @author jitwxs
+ * @author Kyle
  * @date 2019年04月22日 23:54
  */
 @RestController
@@ -29,7 +29,7 @@ public class PaymentApiController {
 
     /**
      * 手动同步支付状态
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/26 0:51
      */
     @PostMapping("/sync")

@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author jitwxs
+ * @author Kyle
  * @date 2019年04月23日 0:29
  */
 @Getter

@@ -17,7 +17,7 @@ import java.util.Collection;
 
 /**
  * 手机登录 UserDetailService，通过手机号读取信息
- * @author jitwxs
+ * @author Kyle
  * @since 2019/1/8 23:37
  */
 @Service

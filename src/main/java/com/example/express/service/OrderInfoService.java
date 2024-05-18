@@ -24,25 +24,25 @@ public interface OrderInfoService extends IService<OrderInfo> {
     boolean isExist(String orderId);
     /**
      * 手动删除
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/25 0:13
      */
     boolean manualDelete(String orderId, int hasDelete, int deleteType);
     /**
      * 是否是某位用户的订单
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/26 0:53
      */
     boolean isUserOrder(String orderId, String userId);
     /**
      * 是否是某位配送员的订单
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/26 0:53
      */
     boolean isCourierOrder(String orderId, String courierId);
     /**
      * 生成订单 & 订单支付
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/23 0:40
      */
     ResponseResult createOrder(OrderInfo orderInfo, double money, String uid);

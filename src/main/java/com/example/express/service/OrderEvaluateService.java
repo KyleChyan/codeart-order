@@ -13,7 +13,7 @@ public interface OrderEvaluateService extends IService<OrderEvaluate> {
     /**
      * 能否评价订单
      * @param roleEnum 只支持用户和配送员
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/5/4 0:52
      */
     boolean canEvaluate(String orderId, String userId, SysRoleEnum roleEnum);

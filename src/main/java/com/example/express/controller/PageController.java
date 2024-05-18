@@ -74,7 +74,7 @@ public class PageController {
 
     /**
      * 跳转到信息补全页面
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/21 22:14
      */
     @RequestMapping("/completeInfo")

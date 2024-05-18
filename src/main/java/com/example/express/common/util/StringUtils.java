@@ -5,7 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @author jitwxs
+ * @author Kyle
  * @date 2019年04月17日 0:32
  */
 public class StringUtils extends org.apache.commons.lang3.StringUtils {

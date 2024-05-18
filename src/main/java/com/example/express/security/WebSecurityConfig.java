@@ -20,7 +20,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 /**
  * Spring Security 核心配置类
- * @author jitwxs
+ * @author Kyle
  * @since 2019/1/8 23:28
  */
 @Configuration

@@ -196,12 +196,7 @@ public class HttpClientUtils {
         String result = RESP_CONTENT;
         // 设置请求和传输超时时间
         HttpPost httpPost = new HttpPost(reqURL);
-        // 这就有可能会导致服务端接收不到POST过去的参数,比如运行在Tomcat6.0.36中的Servlet,所以我们手工指定CONTENT_TYPE头消息
-        if (type != null && type.length() > 0) {
-            httpPost.setHeader(HTTP.CONTENT_TYPE, "application/json; charset=" + ENCODE_CHARSET);
-        } else {
-            httpPost.setHeader(HTTP.CONTENT_TYPE, "application/x-www-form-urlencoded; charset=" + ENCODE_CHARSET);
-        }
+        httpPost.setHeader(HTTP.CONTENT_TYPE, "application/json; charset=" + ENCODE_CHARSET);
         CloseableHttpResponse response = null;
         try {
             if (param != null) {
@@ -313,7 +308,7 @@ public class HttpClientUtils {
     /**
      * url参数转Map
      * 形如：access_token=example_token&scope=&token_type=bearer
-     * @author jitwxs
+     * @author Kyle
      * @since 2018/5/21 16:47
      */
     public static Map<String, String> params2Map(String params) {

@@ -18,7 +18,7 @@ import javax.servlet.http.HttpSession;
 
 /**
  * 传统登录的鉴权过滤器
- * @author jitwxs
+ * @author Kyle
  * @since 2019/1/9 13:52
  */
 public class TraditionAuthenticationFilter extends AbstractAuthenticationProcessingFilter {

@@ -14,7 +14,7 @@ import java.util.Map;
 public interface UserFeedbackService extends IService<UserFeedback> {
     /**
      * 分页查询前台反馈信息
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/23 23:09
      */
     BootstrapTableVO<UserFeedbackVO> pageUserFeedbackVO(Page<UserFeedback> page, QueryWrapper<UserFeedback> wrapper);

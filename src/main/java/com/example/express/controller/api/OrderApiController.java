@@ -6,12 +6,14 @@ import com.example.express.domain.ResponseResult;
 import com.example.express.domain.bean.SysUser;
 import com.example.express.domain.enums.OrderStatusEnum;
 import com.example.express.domain.enums.PaymentStatusEnum;
+import com.example.express.domain.enums.PlatformsEnum;
 import com.example.express.domain.enums.ResponseErrorCodeEnum;
 import com.example.express.domain.vo.BootstrapTableVO;
 import com.example.express.domain.vo.OrderDescVO;
 import com.example.express.domain.vo.courier.CourierOrderVO;
 import com.example.express.exception.CustomException;
 import com.example.express.service.OrderInfoService;
+import com.example.express.service.OrderService;
 import com.example.express.service.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,7 +25,7 @@ import java.util.Map;
 
 /**
  * API订单接口
- * @author jitwxs
+ * @author Kyle
  * @date 2019年04月22日 23:54
  */
 @RestController
@@ -33,13 +35,149 @@ public class OrderApiController {
     private SysUserService sysUserService;
     @Autowired
     private OrderInfoService orderInfoService;
+    @Autowired
+    private OrderService orderService;
+
+    /** （ 新！！）
+     * AJAX获取下单平台
+     * - 用户：个人订单
+     * @author Kyle
+     * @date 2019/4/25 23:36
+     */
+    @GetMapping("/getPlatforms")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public PlatformsEnum[] getPlatforms() {
+        return PlatformsEnum.values();
+    }
+
+    /**（ 新！！）
+     * 获取订单池
+     * - 普通用户：userId = self
+     * - 配送员：courierId = self
+     * - 管理员：无限制
+     * @param type 0:正常订单；1：已删除订单
+     * @author Kyle
+     * @date 2019/4/24 22:21
+     */
+    @GetMapping("/pool")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_COURIER') or hasRole('ROLE_ADMIN')")
+    public BootstrapTableVO listOrderPool(@RequestParam(required = false, defaultValue = "1") Integer current,
+                                          @RequestParam(required = false, defaultValue = "10") Integer size,
+                                          String type, Integer orderStatus, String orderId, String clientNickname,
+                                          String receivePostNumber, String deliverPhone, String startCreateTime, String endCreateTime,
+                                          @AuthenticationPrincipal SysUser sysUser) {
+        Integer isDelete = StringUtils.toInteger(type, -1);
+        if(isDelete == -1) {
+            throw new CustomException(ResponseErrorCodeEnum.PARAMETER_ERROR);
+        }
+
+        String userId = sysUser.getId();
+        StringBuilder sql = new StringBuilder();
+
+        //订单状态筛选
+        if (orderStatus != null&& orderStatus != -1) {
+            sql.append(" AND orderlist.order_status = ").append(orderStatus);
+        }
+
+//        OrderStatusEnum orderStatusEnum = OrderStatusEnum.getByStatus(StringUtils.toInteger(status, -1));
+        //订单号筛选
+        if(StringUtils.isNotBlank(orderId)) {
+            if (orderId.length() == 5) {
+                sql.append(" AND orderlist.order_id like CONCAT('%',").append(orderId).append(")");
+            }else {
+                sql.append(" AND orderlist.order_id = ").append(orderId);
+            }
+        }
+
+        //客户昵称筛选
+        if(StringUtils.isNotBlank(clientNickname)) {
+            sql.append(" AND client.client_nickname like CONCAT('%','").append(clientNickname).append("','%')");
+
+        }
+
+        //客户手机号筛选
+        if(StringUtils.isNotBlank(deliverPhone)) {
+            if (deliverPhone.length() == 4) {
+                sql.append(" AND client.deliver_phone like CONCAT('%',").append(deliverPhone).append(")");
+            }else
+                sql.append(" AND client.deliver_phone = ").append(deliverPhone);
+        }
+
+        //收货运单号筛选
+        if(StringUtils.isNotBlank(receivePostNumber)) {
+            if (receivePostNumber.length() == 5) {
+                sql.append(" AND orderlist.receive_post_number like CONCAT('%',").append(receivePostNumber).append(")");
+            }else
+                sql.append(" AND orderlist.receive_post_number = ").append(receivePostNumber);
+        }
+
+//
+        if(StringUtils.isNotBlank(startCreateTime)) {
+            sql.append(" AND orderlist.create_time > '").append(startCreateTime).append("'");
+        }
+
+        if(StringUtils.isNotBlank(endCreateTime)) {
+            sql.append(" AND orderlist.create_time < '").append(endCreateTime).append("'");
+        }
+//
+//        if(StringUtils.isNotBlank(deliverPhone)) {
+//            sql.append(" AND client.deliver_phone = ").append(deliverPhone);
+//        }
+
+
+        Page page = new Page<>(current, size);
+        page.setAsc("create_time");
+        switch (sysUser.getRole()) {
+            case USER:
+//                sql.append(" AND info.user_id = '").append(userId).append("'");
+                return orderService.pageUserOrderPoolVO(userId, page, sql.toString(), isDelete);
+            default:
+                return new BootstrapTableVO();
+        }
+    }
+
+    /**（ 新！！）
+     * 获取订单池详情信息
+     * - 管理员：任何订单
+     * - 派送员：已接的单
+     * - 用户：个人订单
+     * @author Kyle
+     *
+     */
+    @GetMapping("/pool/{id}")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_COURIER') or hasRole('ROLE_ADMIN')")
+    public ResponseResult getOrderDetail(@PathVariable String id,
+                                         @AuthenticationPrincipal SysUser sysUser) {
+        // 权限校验
+        switch (sysUser.getRole()) {
+            case USER:
+                if(!orderService.isUserOrder(id, sysUser.getId())) {
+                    return ResponseResult.failure(ResponseErrorCodeEnum.NO_PERMISSION);
+                }
+                break;
+//            case COURIER:
+//                if(!orderInfoService.isCourierOrder(id, sysUser.getId())) {
+//                    return ResponseResult.failure(ResponseErrorCodeEnum.NO_PERMISSION);
+//                }
+//                break;
+            default:
+                break;
+        }
+
+        //        if(descVO == null) {
+//            return ResponseResult.failure(ResponseErrorCodeEnum.ORDER_NOT_EXIST);
+//        }
+
+        return orderService.getOrderDetailById(id);
+    }
+
 
     /**
      * 获取订单信息
      * - 管理员：任何订单
      * - 派送员：已接的单
      * - 用户：个人订单
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/25 23:36
      */
     @GetMapping("/{id}")
@@ -70,13 +208,14 @@ public class OrderApiController {
         return ResponseResult.success(descVO);
     }
 
+
     /**
      * 获取所有订单
      * - 普通用户：userId = self
      * - 配送员：courierId = self
      * - 管理员：无限制
      * @param type 0:正常订单；1：已删除订单
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/24 22:21
      */
     @GetMapping("/list")
@@ -298,7 +437,7 @@ public class OrderApiController {
     /**
      * 用户批量删除订单，仅能删除个人订单
      * 状态为订单完成或订单异常
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/24 23:08
      */
     @PostMapping("/batch-delete")
@@ -310,7 +449,7 @@ public class OrderApiController {
     /**
      * 用户批量撤销订单，仅能撤销个人订单
      * 状态为未接单
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/25 0:11
      */
     @PostMapping("/batch-cancel")
@@ -323,7 +462,7 @@ public class OrderApiController {
      * 批量恢复订
      * - 普通用户：恢复个人订单
      * - 管理员：恢复任何订单
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/26 1:58
      */
     @PostMapping("/batch-rollback")

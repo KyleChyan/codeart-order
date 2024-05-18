@@ -57,7 +57,7 @@ public class AuthController {
 
     /**
      * 验证图形验证码
-     * @author jitwxs
+     * @author Kyle
      * @since 2018/5/2 0:02
      */
     @PostMapping(SecurityConstant.VALIDATE_CODE_URL_PREFIX + "/check-img")
@@ -194,7 +194,7 @@ public class AuthController {
     /**
      * 提取Openid
      * @param str 形如：callback( {"client_id":"YOUR_APPID","openid":"YOUR_OPENID"} );
-     * @author jitwxs
+     * @author Kyle
      * @since 2018/5/22 21:37
      */
     private String getQQOpenid(String str) {
@@ -207,7 +207,7 @@ public class AuthController {
 
     /**
      * 人脸登录
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/5/3 0:47
      */
     @SuppressWarnings("Duplicates")
@@ -239,7 +239,7 @@ public class AuthController {
      * 人脸校验
      * 未登录：存session
      * 已登录：存redis
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/5/3 0:23
      */
     @SuppressWarnings("unchecked")
@@ -318,7 +318,7 @@ public class AuthController {
 
     /**
      * 信息补全
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/21 21:07
      */
     @PostMapping("/auth/complete-info")

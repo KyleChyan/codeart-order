@@ -15,7 +15,7 @@ import java.util.Collection;
 
 /**
  * 传统登陆 UserDetailsService
- * @author jitwxs
+ * @author Kyle
  * @since 2019/1/8 23:34
  */
 @Service

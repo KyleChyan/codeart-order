@@ -84,7 +84,7 @@ public class FeedbackApiController {
     /**
      * 获取配送员需要处理反馈列表
      * 所有无人处理，或者处理人是当前用户，且创建人非当前用户的订单反馈
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/25 22:58
      */
     @GetMapping("/handle-list")
@@ -123,7 +123,7 @@ public class FeedbackApiController {
     /**
      * 创建反馈记录
      * - 仅支持 配送员 & 普通用户
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/23 23:13
      */
     @PostMapping("")
@@ -156,7 +156,7 @@ public class FeedbackApiController {
     /**
      * 批量撤销反馈，仅能撤销个人反馈
      * 状态为等待处理
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/25 0:11
      */
     @PostMapping("/batch-cancel")

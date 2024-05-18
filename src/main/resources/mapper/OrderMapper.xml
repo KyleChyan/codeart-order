@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.express.mapper.OrderMapper">
+
+    <select id="pageUserOrderVO" resultType="com.example.express.domain.vo.user.UserOrderPoolVO">
+        SELECT
+            orderlist.order_id,
+            client.client_nickname,
+            orderlist.platform,
+            orderlist.order_type_id,
+            orderlist.order_status,
+            orderlist.urgent,
+            orderlist.total_price,
+            orderlist.deadline_time,
+            orderlist.create_time
+        FROM
+            od_order AS orderlist, od_client AS client
+        WHERE
+            orderlist.client_id = client.client_id AND orderlist.order_deleted = #{has_delete} ${sql} ORDER BY orderlist.urgent DESC
+    </select>
+    <select id="pageCourierOrderVO" resultType="com.example.express.domain.vo.courier.CourierOrderVO">
+        SELECT
+            info.id,
+            info.odd,
+            info.company as company,
+            info.rec_name AS rec_name,
+            info.rec_tel AS rec_tel,
+            info.address AS address,
+            info.rec_address AS rec_address,
+            info.remark AS remark,
+            info.status AS order_status,
+            info.create_date AS create_date
+        FROM
+            order_payment AS payment, order_info AS info
+        WHERE
+            info.id = payment.order_id ${sql}
+    </select>
+    <select id="selectByIdIgnoreDelete" resultType="com.example.express.domain.bean.OrderInfo">
+        SELECT * FROM `order_info` WHERE id = #{id}
+    </select>
+    <select id="pageAdminOrderVO" resultType="com.example.express.domain.vo.admin.AdminOrderVO">
+        SELECT
+            info.id,
+            info.odd,
+            info.company AS company,
+            info.rec_name AS rec_name,
+            info.rec_tel AS rec_tel,
+            info.address AS address,
+            info.rec_address AS rec_address,
+            info.remark AS remark,
+            info.status AS order_status,
+            payment.status AS payment_status,
+            info.delete_type AS delete_type,
+            info.create_date
+        FROM
+            order_payment AS payment, order_info AS info
+        WHERE
+            info.id = payment.order_id AND info.has_delete = #{has_delete} ${sql}
+    </select>
+</mapper>

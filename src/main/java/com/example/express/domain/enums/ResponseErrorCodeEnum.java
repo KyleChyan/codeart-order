@@ -69,6 +69,11 @@ public enum ResponseErrorCodeEnum {
     ORDER_PAYMENT_CREATE_ERROR(400702, 400, "订单支付信息创建失败"),
     ORDER_PAYMENT_SYNC_ERROR(400703, 400, "订单支付状态同步失败"),
 
+    CLIENT_ERROR(400111,400,"客户信息业务出错"),
+    TYPE_ORDER_ERROR(400112,400,"投妆类型业务出错"),
+    ORDER_ERROR(400113,400,"订单业务出错"),
+    HEAD_ERROR(400114,400,"娃头业务出错"),
+
     FEEDBACK_TYPE_ERROR(400801, 400, "反馈类型错误"),
     FEEDBACK_NOT_EMPTY(400802, 400, "反馈内容不能为空"),
     STR_LENGTH_OVER(400803, 400, "%s内容过长，请控制在%s字符内"),
@@ -81,6 +86,11 @@ public enum ResponseErrorCodeEnum {
     ACCOUNT_DISABLE(401005, 401, "账户失效，如有疑问，请提交反馈"),
     ACCOUNT_EXPIRE(401006, 401, "账户过期，如有疑问，请提交反馈"),
     PASSWORD_EXPIRE(401007, 401, "密码已过期"),
+
+    CLIENT_FAILED(400111,401,"客户信息业务失败"),
+    TYPE_ORDER_FAILED(400112,400,"投妆类型业务失败"),
+    ORDER_FAILED(400113,400,"订单业务失败"),
+    HEAD_FAILED(400114,400,"娃头业务失败"),
 
     /* Forbidden */
     ROLE_ERROR(403001, 403, "角色错误"),
@@ -105,6 +115,9 @@ public enum ResponseErrorCodeEnum {
 
     ORDER_NOT_EXIST(409701, 409, "订单不存在"),
     EXIST_UNFINISHED_ORDER(409702, 409, "当前存在未完成的订单"),
+
+
+
     ;
 
     /**

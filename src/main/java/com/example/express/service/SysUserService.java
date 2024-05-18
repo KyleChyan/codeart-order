@@ -61,19 +61,19 @@ public interface SysUserService extends IService<SysUser> {
     ResponseResult thirdLogin(String thirdLoginId, ThirdLoginTypeEnum thirdLoginTypeEnum);
     /**
      * 根据用户名注册
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/22 0:39
      */
     ResponseResult registryByUsername(String username, String password);
     /**
      * 根据手机号注册
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/22 0:39
      */
     ResponseResult registryByTel(String tel, String code, HttpSession session);
     /**
      * 人脸注册
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/5/3 0:34
      * @param gender male:男性 female:女性
      */

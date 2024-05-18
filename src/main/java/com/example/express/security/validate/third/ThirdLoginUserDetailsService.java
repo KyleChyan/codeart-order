@@ -17,7 +17,7 @@ import java.util.Collection;
 
 /**
  * 三方登陆 UserDetailService，通过用户ID读取信息
- * @author jitwxs
+ * @author Kyle
  * @since 2019/1/8 23:37
  */
 @Service

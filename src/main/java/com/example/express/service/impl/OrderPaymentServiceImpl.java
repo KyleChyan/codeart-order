@@ -47,7 +47,7 @@ public class OrderPaymentServiceImpl extends ServiceImpl<OrderPaymentMapper, Ord
     /**
      * 校验订单
      * 支付宝同步/异步回调时调用
-     * @author jitwxs
+     * @author Kyle
      * @since 2018/6/4 16:40
      */
     @Override

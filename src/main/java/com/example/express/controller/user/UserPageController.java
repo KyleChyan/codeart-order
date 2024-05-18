@@ -73,12 +73,44 @@ public class UserPageController {
     }
 
     /**
+     * 新下单页面
+     */
+    @RequestMapping("/newOrder")
+    public String showNewOrderPage(@AuthenticationPrincipal SysUser sysUser, ModelMap map) {
+        map.put("frontName", sysUserService.getFrontName(sysUser));
+        return "user/newOrder";
+    }
+
+    /**
+     * 订单池
+     */
+    @RequestMapping("/orderPool")
+    public String showOrderPool(@AuthenticationPrincipal SysUser sysUser, ModelMap map) {
+        map.put("frontName", sysUserService.getFrontName(sysUser));
+        return "user/orderPool";
+    }
+
+    /**
      * 支付页面
-     * @author jitwxs
+     * @author Kyle
      * @date 2019/4/23 0:00
      */
     @RequestMapping("/order/place")
     public String placeOrder(OrderInfo orderInfo, ModelMap map, HttpSession session, @AuthenticationPrincipal SysUser sysUser) {
+        map.put("frontName", sysUserService.getFrontName(sysUser));
+        map.put("order", orderInfo);
+        map.put("company", dataCompanyService.getByCache(orderInfo.getCompany()).getName());
+        session.setAttribute(SessionKeyConstant.SESSION_LATEST_EXPRESS, orderInfo);
+        return "user/payment";
+    }
+
+    /**
+     * 订单新增页面
+     * @author Kyle
+     * @date 2019/4/23 0:00
+     */
+    @RequestMapping("/order/newplace")
+    public String createOrder(OrderInfo orderInfo, ModelMap map, HttpSession session, @AuthenticationPrincipal SysUser sysUser) {
         map.put("frontName", sysUserService.getFrontName(sysUser));
         map.put("order", orderInfo);
         map.put("company", dataCompanyService.getByCache(orderInfo.getCompany()).getName());

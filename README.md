@@ -1,6 +1,6 @@
 ## 快递代拿系统
 
-> 该项目基于[[express-ssm]](https://github.com/jitwxs/express-ssm) 项目全面升级，使用当前最为流行的 SpringBoot 框架，相关技术栈全面更新！是您深入学习 SpringBoot 开发的最佳实践！
+> 该项目基于[[express-ssm]](https://github.com/Kyle/express-ssm) 项目全面升级，使用当前最为流行的 SpringBoot 框架，相关技术栈全面更新！是您深入学习 SpringBoot 开发的最佳实践！
 
 ### 相关技术栈
 
@@ -197,5 +197,5 @@ baidu:
 
 1. 请您仔细阅读 **项目运行** 章节，**确认已经仔细阅读情况下**，仍存在疑问的。
 2. 请提 issue，如需要添加附件、程序等其他 issue 无法较好解决的疑问。
-3. 请发送到邮件：`jitwxs@foxmail.com`。
+3. 请发送到邮件：`Kyle@foxmail.com`。
 4. **如有疑问，请优先提 Issue，既能帮助后来者，也避免邮件的不及时回复。**

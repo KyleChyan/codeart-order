@@ -21,7 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * 短信登陆鉴权 Provider，要求实现 AuthenticationProvider 接口
- * @author jitwxs
+ * @author Kyle
  * @since 2019/1/9 13:59
  */
 @Slf4j

@@ -1,6 +1,6 @@
 /*
     desp：HTTP相关
-    author:jitwxs
+    author:Kyle
     time:2018-03-15
  */
 
