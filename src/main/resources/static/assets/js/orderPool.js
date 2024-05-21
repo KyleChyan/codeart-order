@@ -136,6 +136,13 @@ function showDetail(id) {
             $("#inputInfoCreateTime").text(data.createTime);
             $("#inputInfoDeadlineTime").text(data.deadlineTime);
 
+            // 根据 reserve 字段动态更新预订单提示
+            if (data.reserve) {
+                $("#reserveLabel").show();
+            } else {
+                $("#reserveLabel").hide();
+            }
+
             $("#infoModel").modal("show");
         }
     }, function () {

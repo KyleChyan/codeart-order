@@ -96,6 +96,10 @@ public class UserOrderDetailVO implements Serializable {
     remark：备注
   */
   private String remark;
+  /**
+   reserve：预约单
+   */
+  private Boolean reserve;
 
   /**
    extraPrice：此子订单额外价格
