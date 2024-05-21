@@ -12,23 +12,23 @@ import java.util.Arrays;
 @Getter
 public enum NewOrderStatusEnum implements IEnum<Integer> {
     /**
+     * 已超时
+     */
+    TIME_OUT("已超时", 0),
+
+    /**
      * 未收到货
      */
-    READY_RECEIVE("未收到货", 0),
+    READY_RECEIVE("未收到货", 1),
     /**
      * 准备开工
      */
-    READY_TO_START("准备开工", 1),
+    READY_TO_START("准备开工", 2),
 
     /**
      * 施工中
      */
-    ABUILDING("施工中", 2),
-
-    /**
-     * 已超时
-     */
-    TIME_OUT("已超时", 3),
+    ABUILDING("施工中", 3),
 
     /**
      * 已发货

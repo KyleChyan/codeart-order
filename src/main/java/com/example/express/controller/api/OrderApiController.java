@@ -11,6 +11,7 @@ import com.example.express.domain.enums.ResponseErrorCodeEnum;
 import com.example.express.domain.vo.BootstrapTableVO;
 import com.example.express.domain.vo.OrderDescVO;
 import com.example.express.domain.vo.courier.CourierOrderVO;
+import com.example.express.domain.vo.req.OrderInsertReq;
 import com.example.express.exception.CustomException;
 import com.example.express.service.OrderInfoService;
 import com.example.express.service.OrderService;
@@ -20,6 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,6 +67,7 @@ public class OrderApiController {
                                           @RequestParam(required = false, defaultValue = "10") Integer size,
                                           String type, Integer orderStatus, String orderId, String clientNickname,
                                           String receivePostNumber, String deliverPhone, String startCreateTime, String endCreateTime,
+                                          Boolean reserve,
                                           @AuthenticationPrincipal SysUser sysUser) {
         Integer isDelete = StringUtils.toInteger(type, -1);
         if(isDelete == -1) {
@@ -76,7 +79,10 @@ public class OrderApiController {
 
         //订单状态筛选
         if (orderStatus != null&& orderStatus != -1) {
-            sql.append(" AND orderlist.order_status = ").append(orderStatus);
+            if (orderStatus==0){
+                sql.append(" AND orderlist.reserve = true");
+            }else
+                sql.append(" AND orderlist.order_status = ").append(orderStatus);
         }
 
 //        OrderStatusEnum orderStatusEnum = OrderStatusEnum.getByStatus(StringUtils.toInteger(status, -1));
@@ -111,7 +117,7 @@ public class OrderApiController {
                 sql.append(" AND orderlist.receive_post_number = ").append(receivePostNumber);
         }
 
-//
+        //起始日期筛选
         if(StringUtils.isNotBlank(startCreateTime)) {
             sql.append(" AND orderlist.create_time > '").append(startCreateTime).append("'");
         }
@@ -119,11 +125,15 @@ public class OrderApiController {
         if(StringUtils.isNotBlank(endCreateTime)) {
             sql.append(" AND orderlist.create_time < '").append(endCreateTime).append("'");
         }
-//
-//        if(StringUtils.isNotBlank(deliverPhone)) {
-//            sql.append(" AND client.deliver_phone = ").append(deliverPhone);
-//        }
 
+        System.out.println("预订单的选项是："+reserve);
+
+        if (reserve) {
+            if (orderStatus!=null&&orderStatus==0){
+                sql.append(" AND orderlist.reserve = true");
+            }else
+                sql.append(" AND orderlist.reserve = false");
+        }
 
         Page page = new Page<>(current, size);
         page.setAsc("create_time");
@@ -171,6 +181,41 @@ public class OrderApiController {
         return orderService.getOrderDetailById(id);
     }
 
+    /**（ 新！！）
+     * 提交订单
+     * @param req
+     * @author Kyle
+     * @since 2018/5/14 8:53
+     */
+    @PostMapping("/sub")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_COURIER') or hasRole('ROLE_ADMIN')")
+    public ResponseResult subOrder(OrderInsertReq req, @AuthenticationPrincipal SysUser sysUser) throws IOException {
+//        OrderInsertReq req = (OrderInsertReq)session.getAttribute(SessionKeyConstant.SESSION_LATEST_EXPRESS);
+//        req.setExtraPrice(10.00);
+        System.out.println(req);
+        double prePrice = 0;
+        switch (req.getOrderTypeId()){
+            case 1:
+                break;
+            case 2:
+                prePrice=35.00;
+                break;
+            case 3:
+                prePrice=45.00;
+                break;
+            case 4:
+                prePrice=20;
+                break;
+        }
+        req.setTotalPrice(prePrice+ req.getExtraPrice());
+        // 生成订单
+        ResponseResult result1 = orderService.insertOrder(req,sysUser.getId());
+        if(result1.getCode() != ResponseErrorCodeEnum.SUCCESS.getCode()) {
+            throw new CustomException(result1);
+        }
+        System.out.println("我得到的ResponseResult是："+result1.getData());
+        return result1;
+    }
 
     /**
      * 获取订单信息

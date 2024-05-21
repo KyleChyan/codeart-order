@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import javax.annotation.Resource;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -113,13 +114,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
             //set order内的属性
             BeanUtil.copyProperties(req, order);
-            order.setOrderStatus(0);//订单状态
+            order.setOrderStatus(1);//订单状态
 //            order.setPlatform(PlatformsEnum.TAOBAO);
             order.setUserId(uid);//userid
                 // 设定时间属性
             order.setCreateTime(nowTime);
             order.setModifyTime(nowTime);
-                // 设定加急
+                // 设定工期
             if (req.getUrgent() ==null||!req.getUrgent()) {
                 order.setDeadlineTime(nowTime.plusDays(15));//正常交付时间
             }else
@@ -180,9 +181,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public BootstrapTableVO<UserOrderPoolVO> pageUserOrderPoolVO(String userId, Page<UserOrderPoolVO> page, String sql, int isDelete) {
         BootstrapTableVO<UserOrderPoolVO> vo = new BootstrapTableVO<>();
-
         IPage<UserOrderPoolVO> selectPage = orderMapper.pageUserOrderVO(page, sql, isDelete);
-
 /*
 
         for(UserOrderPoolVO orderVO : selectPage.getRecords()) {
@@ -200,6 +199,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
         }
 */
+        for (UserOrderPoolVO poolVO : selectPage.getRecords()) {
+            poolVO.setRemainDays(this.flushOrderStatus(poolVO.getOrderId()));
+        }
 
         vo.setTotal(selectPage.getTotal());
         vo.setRows(selectPage.getRecords());
@@ -208,68 +210,36 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    public List<OrderListResp> getOrderList(OrderSearchReq req) {
-        try {
-            List<OrderListResp> respList= new ArrayList<>();
-            LambdaQueryWrapper<Order> orderWrapper = Wrappers.lambdaQuery();
-            LambdaQueryWrapper<OrderItem> itemWrapper = Wrappers.lambdaQuery();
-            LambdaQueryWrapper<Client> clientWrapper = Wrappers.lambdaQuery();
-            //若是已完成/已关闭订单
-            if (req.getOrderStatus()!=null&&req.getOrderStatus() == 5||req.getOrderStatus()!=null&&req.getOrderStatus() == 9) {
-                orderWrapper.eq(Order::getOrderStatus,req.getOrderStatus());
-            }
-            //若存在客户昵称
-            if (req.getClientNickname() != null) {
-                Client client = clientService.getClientDetailByNickname(req.getClientNickname());
-                orderWrapper
-                        .eq(Order::getClientId,client.getClientId());
-            }
-            //若存在收货单号
-            if (req.getReceivePostNumber() != null) {
-                itemWrapper
-                        .eq(req.getReceivePostNumber().length()!=5,OrderItem::getReceivePostNumber,req.getReceivePostNumber())
-                        .likeLeft(req.getReceivePostNumber().length()==5,OrderItem::getReceivePostNumber,req.getReceivePostNumber())
-                        .select(OrderItem::getOrderId);
-                OrderItem orderItem = this.orderItemMapper.selectOne(itemWrapper);
-                orderWrapper
-                        .eq(Order::getOrderId,orderItem.getOrderId());
-            }
-            orderWrapper
-                    .eq(req.getOrderId()!=null,Order::getOrderId,req.getOrderId())
-                    .eq(req.getOrderStatus()!=null,Order::getOrderStatus,req.getOrderStatus())
-                    .ge(req.getTotalPriceStart()!=0.0,Order::getTotalPrice,req.getTotalPriceStart())
-                    .le(req.getTotalPriceEnd()!=0.0,Order::getTotalPrice,req.getTotalPriceEnd())
-                    .likeLeft(req.getDeliverPostNumber()!=null&&req.getDeliverPostNumber().length()==5,Order::getDeliverPostNumber,req.getDeliverPostNumber())
-                    .ge(req.getDeadlineTimeStart()!=null,Order::getDeadlineTime,req.getDeadlineTimeStart())
-                    .le(req.getDeadlineTimeEnd()!=null,Order::getDeadlineTime,req.getDeadlineTimeEnd())
-                    .eq(Order::getOrderDeleted,0);
-            List<Order> orderList = this.orderMapper.selectList(orderWrapper);
-            //加入客户昵称
-            for (Order order : orderList) {
-                    Client client = this.clientService.getClientDetailById(order.getClientId());
-                    OrderListResp orderResp= new OrderListResp();
-                    BeanUtil.copyProperties(order,orderResp);
-                    orderResp.setClientNickname(client.getClientNickname());
-                    orderResp.initResp();
-                    respList.add(orderResp);
-                }
-            return respList;
-
-
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+    public Boolean isUserOrder(String orderId, String userId) {
+        Order order = getById(orderId);
+        if(order == null) {
+            return false;
         }
+        return order.getUserId().equals(userId);
     }
 
     @Override
-    public Boolean isUserOrder(String orderId, String userId) {
-        Order info = getById(orderId);
-        if(info == null) {
-            return false;
+    public Integer flushOrderStatus(String orderId) {
+        // 从数据库中获取订单信息
+        Order order = getById(orderId);
+        if (order == null) {
+            return null; // 如果订单不存在，返回 null
         }
-        return info.getUserId().equals(userId);
+
+        // 获取订单的和截止时间
+        LocalDateTime deadlineTime = order.getDeadlineTime();
+
+        // 获取当前时间
+        LocalDateTime nowTime = LocalDateTime.now();
+
+        // 使用 Duration 类计算两个时间之间的时间间隔
+        Duration duration = Duration.between(nowTime, deadlineTime);
+        // 将时间间隔转换为天数
+        long days = duration.toDays();
+        // 将剩余天数转换为 Integer 类型并返回
+        return Math.toIntExact(days+1);
     }
+
 
     @Override
     public String updateOrderDetail(Order order) {

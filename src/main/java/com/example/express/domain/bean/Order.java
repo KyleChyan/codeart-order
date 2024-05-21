@@ -96,6 +96,11 @@ public class Order implements Serializable {
   private double totalPrice;
 
   /**
+   reserve：预约单
+   */
+  private Boolean reserve;
+
+  /**
    urgent：加急
    */
   private Boolean urgent;
@@ -104,17 +109,20 @@ public class Order implements Serializable {
     orderDeleted：订单删除状态
   */
   private Integer orderDeleted;
+
   /**
     createTime：创建时间
   */
   @TableField(fill = FieldFill.INSERT)
   @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
   private LocalDateTime createTime;
+
   /**
     deadlineTime：交付时间
   */
   @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
   private LocalDateTime deadlineTime;
+
   /**
     modifyTime：修改时间
   */

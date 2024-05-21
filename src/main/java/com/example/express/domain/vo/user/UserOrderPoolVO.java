@@ -37,6 +37,14 @@ public class UserOrderPoolVO {
      */
     private Integer orderStatus;
     /**
+     remainDays：剩余工期
+     */
+    private Integer remainDays;
+    /**
+     reserve：预约单
+     */
+    private Boolean reserve;
+    /**
      urgent：加急
      */
     private Boolean urgent;
@@ -54,14 +62,4 @@ public class UserOrderPoolVO {
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date createTime;
-
-    /**
-     剩余工期
-     */
-    private Integer remainTime;
-
-    /**
-     时间状态 1-剩余超过8天 2-剩余3~7天 3-剩余不足3天 0-已超时
-     */
-    private Integer timeStatus;
 }

@@ -42,13 +42,6 @@ public interface OrderService {
      * @return
      */
     BootstrapTableVO<UserOrderPoolVO> pageUserOrderPoolVO(String userId, Page<UserOrderPoolVO> page, String sql, int isDelete);
-    /**
-     * 查找订单列表
-     *
-     * @param req
-     * @return
-     */
-    List<OrderListResp> getOrderList(OrderSearchReq req);
 
     /**
      * 是否是某位用户的订单
@@ -56,6 +49,14 @@ public interface OrderService {
      * @date 2019/4/26 0:53
      */
     Boolean isUserOrder(String orderId, String userId);
+
+    /**
+     * 刷新订单状态
+     *
+     * @param orderId
+     * @return
+     */
+    Integer flushOrderStatus(String orderId);
 
     /**
      * 更新订单信息
