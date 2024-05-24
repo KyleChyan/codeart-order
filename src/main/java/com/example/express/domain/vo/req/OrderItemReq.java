@@ -10,9 +10,9 @@ import lombok.Data;
 @Data
 public class OrderItemReq {
     /**
-     orderTypeId：订单类型
+     typeId：订单类型
      */
-    private Integer orderTypeId;
+    private Integer typeId;
     /**
      headId：娃头id
      */

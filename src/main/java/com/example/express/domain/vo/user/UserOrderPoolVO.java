@@ -29,9 +29,13 @@ public class UserOrderPoolVO {
      */
     private Integer platform;
     /**
-     orderTypeId：订单类型
+     typeId：订单类型
      */
-    private Integer orderTypeId;
+    private Integer typeId;
+    /**
+     typeId：订单类型
+     */
+    private String typeName;
     /**
      orderStatus：订单状态
      */

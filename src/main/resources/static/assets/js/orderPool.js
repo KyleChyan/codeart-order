@@ -1,4 +1,22 @@
-
+//从缓存加载订单类型数据
+function loadOrderTypeData() {
+    sendJson(HTTP.GET, "/api/v1/public/orderType", null, false, function (res) {
+        if (res.code === 0) {
+            let html = '', data = res.data;
+            for (let i = 0; i < data.length; i++) {
+                if(data[i].typeId===0){
+                    continue;
+                }else
+                    html += '<option value="' + data[i].typeId + '">' + data[i].typeName  + '</option>\n';
+            }
+            $("#inputCreateTypeId").html(html);
+        } else {
+            layer.msg(res.msg, { icon: 2 });
+        }
+    }, function () {
+        layer.msg("未知错误", { icon: 2 });
+    });
+}
 // 初始化订单池表格
 var TableInit = function () {
     let oTableInit = new Object();
@@ -44,9 +62,9 @@ var TableInit = function () {
                 title: '下单平台',
                 formatter: platfromFormatter
             }, {
-                field: 'orderTypeId',
-                title: '订单类型',
-                formatter: orderTypeFormatter
+                field: 'typeName',
+                title: '订单类型'
+                // formatter: orderTypeFormatter
             }, {
                 field: 'orderStatus',
                 title: '订单状态',
@@ -108,14 +126,14 @@ function showDetail(id) {
             $("#inputInfoOrderStatus").html(formattedOrderStatus);  // 使用 html() 方法插入格式化后的 HTML 内容
 
             // 使用 orderFormatter 函数格式化下单平台字段
-            let formattedOrderType = orderTypeFormatter(data.orderTypeId);
-            $("#inputInfoOrderType").html(formattedOrderType);  // 使用 html() 方法插入格式化后的 HTML 内容
-
+            // let formattedOrderType = orderTypeFormatter(data.typeId);
+            // $("#inputInfoOrderType").html(formattedOrderType);  // 使用 html() 方法插入格式化后的 HTML 内容
+            $("#inputInfoOrderType").text(data.typeName);
             // 使用 platfromFormatter 函数格式化下单平台字段
             let formattedPlatform = platfromFormatter(data.platform);
             $("#inputInfoPlatform").html(formattedPlatform);  // 使用 html() 方法插入格式化后的 HTML 内容
 
-            $("#inputInfoHeadName").text(data.typeName);
+            $("#inputInfoHeadName").text(data.headName);
             $("#inputInfoFen").text(data.fen);
             $("#inputInfoCount").text(data.count);
 
@@ -125,8 +143,6 @@ function showDetail(id) {
 
             $("#inputInfoReceive").text(data.receivePostNumber);
             $("#inputInfoDeliver").html('<span style="color: red;">' + data.deliverPostNumber + '</span>');
-
-
             $("#inputInfoDemand").text(data.orderDemand);
             $("#inputInfoRemark").text(data.remark);
 
@@ -193,8 +209,8 @@ var ButtonInit = function () {
             if(row.length > 0) {
                 let ids = new Array();
                 for (let i = 0; i < row.length; i++) {
-                    if (row[i].orderStatus === 3 || row[i].orderStatus === 4) {
-                        ds.push(row[i].id);
+                    if (row[i].orderStatus !== 9) {
+                        ids.push(row[i].orderId);
                     }
                 }
                 if (ids.length === 0) {
@@ -204,7 +220,7 @@ var ButtonInit = function () {
                     layer.confirm("删除的订单号为：" + ids + "，确认执行？", {
                         btn: ['确定','取消']
                     }, function(){
-                        sendArray(HTTP.POST, "/api/v1/order/batch-delete", {"ids": ids}, false, function (res) {
+                        sendArray(HTTP.POST, "/api/v1/order/delete", {"orderIds": ids}, false, function (res) {
                             if(res.code === 0) {
                                 layer.msg("成功，删除" + res.data.success + "个，失败" + res.data.error + "个",{icon:1});
                                 flushTable();
@@ -418,7 +434,7 @@ function initializeCreateFormValidation() {
                 required: true,
                 maxlength: 64
             },
-            orderTypeId: {
+            typeId: {
                 required: true
             },
             platform: {
@@ -455,7 +471,7 @@ function initializeCreateFormValidation() {
                 required: "娃头数量不能为空",
                 maxlength: "娃头数量超过限制长度"
             },
-            orderTypeId: {
+            typeId: {
                 required: "投妆类型不能为空"
             },
             platform: {

@@ -182,6 +182,36 @@ public class OrderApiController {
     }
 
     /**（ 新！！）
+     * 删除订单
+     * @param orderIds
+     * @author Kyle
+     * @since 2018/5/14 8:53
+     */
+    @PostMapping("/delete")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseResult deleteOrder(String[] orderIds, @AuthenticationPrincipal SysUser sysUser) {
+
+        int success = 0;
+        //校验成功的返回个数
+        for(String orderId : orderIds) {
+            ResponseResult result = orderService.delectOrderById(orderId,sysUser.getId());
+
+            if(result.getCode() != ResponseErrorCodeEnum.SUCCESS.getCode()) {
+                continue;
+            }else
+                success++;
+
+            System.out.println("我得到的ResponseResult是："+result.getData());
+        }
+
+        // 返回
+        Map<String, Integer> count = new HashMap<>(16);
+        count.put("success", success);
+        count.put("error", orderIds.length - success);
+        return ResponseResult.success(count);
+    }
+
+    /**（ 新！！）
      * 提交订单
      * @param req
      * @author Kyle
@@ -193,21 +223,8 @@ public class OrderApiController {
 //        OrderInsertReq req = (OrderInsertReq)session.getAttribute(SessionKeyConstant.SESSION_LATEST_EXPRESS);
 //        req.setExtraPrice(10.00);
         System.out.println(req);
-        double prePrice = 0;
-        switch (req.getOrderTypeId()){
-            case 1:
-                break;
-            case 2:
-                prePrice=35.00;
-                break;
-            case 3:
-                prePrice=45.00;
-                break;
-            case 4:
-                prePrice=20;
-                break;
-        }
-        req.setTotalPrice(prePrice+ req.getExtraPrice());
+
+
         // 生成订单
         ResponseResult result1 = orderService.insertOrder(req,sysUser.getId());
         if(result1.getCode() != ResponseErrorCodeEnum.SUCCESS.getCode()) {
@@ -216,6 +233,8 @@ public class OrderApiController {
         System.out.println("我得到的ResponseResult是："+result1.getData());
         return result1;
     }
+
+
 
     /**
      * 获取订单信息

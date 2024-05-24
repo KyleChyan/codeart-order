@@ -23,9 +23,9 @@ public class OrderItem {
   */
   private String orderId;
   /**
-    orderTypeId：订单类型
+    typeId：订单类型
   */
-  private Integer orderTypeId;
+  private Integer typeId;
   /**
     headId：娃头id
   */

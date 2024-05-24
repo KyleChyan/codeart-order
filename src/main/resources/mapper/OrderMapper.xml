@@ -7,7 +7,7 @@
             orderlist.order_id,
             client.client_nickname,
             orderlist.platform,
-            orderlist.order_type_id,
+            orderlist.type_id,
             orderlist.order_status,
             orderlist.urgent,
             orderlist.total_price,

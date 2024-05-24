@@ -50,7 +50,7 @@ public class UserOrderDetailVO implements Serializable {
   /**
    typeName：娃头名称
    */
-  private String typeName;
+  private String headName;
 
   /**
    fen：几分娃头
@@ -58,9 +58,9 @@ public class UserOrderDetailVO implements Serializable {
   private String fen;
 
   /**
-   orderTypeId：订单类型
+   typeId：订单类型
    */
-  private Integer orderTypeId;
+  private String typeName;
 
   /**
    count：娃头数量

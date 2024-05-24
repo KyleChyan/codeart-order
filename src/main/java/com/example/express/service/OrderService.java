@@ -59,6 +59,14 @@ public interface OrderService {
     Integer flushOrderStatus(String orderId);
 
     /**
+     * 删除订单信息（逻辑删除）
+     *
+     * @param orderId
+     * @return
+     */
+    ResponseResult delectOrderById(String orderId, String userId);
+
+    /**
      * 更新订单信息
      *
      * @param order
@@ -98,11 +106,4 @@ public interface OrderService {
      */
     String finishOrder(String orderId,Integer orderStatus);
 
-    /**
-     * 删除订单信息（逻辑删除）
-     *
-     * @param orderId
-     * @return
-     */
-    String delectOrder(Integer orderId);
 }

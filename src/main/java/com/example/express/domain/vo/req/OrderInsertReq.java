@@ -40,9 +40,9 @@ public class OrderInsertReq {
     private String deliverAddress;
 
     /**
-       typeName：娃头名称
+       headName：娃头名称
      */
-    private String typeName;
+    private String headName;
 
     /**
        fen：几分娃头
@@ -55,9 +55,9 @@ public class OrderInsertReq {
     private Integer count;
 
     /**
-       orderTypeId：订单类型
+       typeId：订单类型
      */
-    private Integer orderTypeId;
+    private Integer typeId;
 
     /**
        orderPlatformId：下单平台

@@ -25,4 +25,9 @@ public class RedisKeyConstant {
      * 最后设置的人脸数据face_token
      */
     public static String LAST_FACE_TOKEN = "LAST_FACE_TOKEN";
+
+    /**
+     * 订单类型列表
+     */
+    public static String DATA_ORDER_TYPE = "DATA_ORDER_TYPE";
 }

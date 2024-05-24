@@ -6,11 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.checkerframework.checker.units.qual.A;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -26,9 +22,9 @@ public class Head implements Serializable {
   private Long headId;
 
   /**
-   typeName：娃头名称
+   headName：娃头名称
    */
-  private String typeName;
+  private String headName;
 
   /**
    fen：几分娃头
@@ -52,14 +48,14 @@ public class Head implements Serializable {
    */
   private String remark;
 
-  public Head(String typeName, String fen) {
-    this.typeName=typeName;
+  public Head(String headName, String fen) {
+    this.headName = headName;
     this.fen=fen;
   }
 
-  public Head(Long headId, String typeName, String fen, LocalDateTime createTime, String remark) {
+  public Head(Long headId, String headName, String fen, LocalDateTime createTime, String remark) {
     this.headId = headId;
-    this.typeName = typeName;
+    this.headName = headName;
     this.fen = fen;
     this.createTime = createTime;
     this.remark = remark;

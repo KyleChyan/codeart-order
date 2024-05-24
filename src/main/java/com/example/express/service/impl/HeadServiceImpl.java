@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.example.express.domain.ResponseResult;
-import com.example.express.domain.bean.Client;
 import com.example.express.domain.bean.Head;
 import com.example.express.domain.enums.ResponseErrorCodeEnum;
 import com.example.express.mapper.HeadMapper;
@@ -37,7 +36,7 @@ public class HeadServiceImpl implements HeadService {
             return null;
         }
         LambdaQueryWrapper<Head> lambdaQueryWrapper = Wrappers.lambdaQuery();
-        lambdaQueryWrapper.like(Head::getTypeName,name);
+        lambdaQueryWrapper.like(Head::getHeadName,name);
         return headMapper.selectOne(lambdaQueryWrapper);
     }
 
@@ -47,7 +46,7 @@ public class HeadServiceImpl implements HeadService {
             return null;
         }
         LambdaQueryWrapper<Head> lambdaQueryWrapper = Wrappers.lambdaQuery();
-        lambdaQueryWrapper.like(Head::getTypeName,name)
+        lambdaQueryWrapper.like(Head::getHeadName,name)
                 .eq(Head::getFen,fen);
         return headMapper.selectOne(lambdaQueryWrapper);
     }
@@ -68,7 +67,7 @@ public class HeadServiceImpl implements HeadService {
         LambdaQueryWrapper<Head> lambdaQueryWrapper = Wrappers.lambdaQuery();
 
         lambdaQueryWrapper
-                .like(head.getTypeName()!=null,Head::getTypeName,head.getTypeName())
+                .like(head.getHeadName()!=null,Head::getHeadName,head.getHeadName())
                 .eq(head.getFen()!=null,Head::getFen,head.getFen());
 //                .eq(head.getSkin()!=null,Head::getSkin,head.getSkin());
 
@@ -80,7 +79,7 @@ public class HeadServiceImpl implements HeadService {
         LambdaUpdateWrapper<Head> lambdaUpdateWrapper =new LambdaUpdateWrapper<>();
         lambdaUpdateWrapper
                 .eq(Head::getHeadId,head.getHeadId())
-                .set(head.getTypeName()!=null,Head::getTypeName,head.getTypeName())
+                .set(head.getHeadName()!=null,Head::getHeadName,head.getHeadName())
                 .set(head.getFen()!=null,Head::getFen,head.getFen());
 //                .set(head.getSkin()!=null,Head::getSkin,head.getSkin());
         int updated = headMapper.update(head, lambdaUpdateWrapper);

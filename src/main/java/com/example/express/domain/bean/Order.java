@@ -44,9 +44,9 @@ public class Order implements Serializable {
   private Long headId;
 
   /**
-   orderTypeId：订单类型
+   typeId：订单类型
    */
-  private Integer orderTypeId;
+  private Integer typeId;
 
   /**
    count：娃头数量

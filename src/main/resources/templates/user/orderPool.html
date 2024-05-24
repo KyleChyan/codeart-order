@@ -164,7 +164,7 @@
                         <div class="form-group">
                             <label for="inputCreateHeadName" class="col-sm-2 control-label"><span style="color: red">*</span>娃头名称</label>
                             <div class="col-sm-10">
-                                <input type="tel" class="form-control input-width" id="inputCreateHeadName" name="typeName" placeholder="娃头名称">
+                                <input type="tel" class="form-control input-width" id="inputCreateHeadName" name="headName" placeholder="娃头名称">
                             </div>
                         </div>
                         <div class="form-group">
@@ -174,19 +174,19 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="inputCreateCount" class="col-sm-2 control-label"><span style="color: red">*</span>娃头数量</label>
+                            <label for="inputCreateCount" class="col-sm-2 control-label"><span style="color: red">*</span>订单数量</label>
                             <div class="col-sm-10">
                                 <input type="number"  class="form-control input-width" id="inputCreateCount" name="count" placeholder="娃头数量" value="1">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="inputCreateOrderTypeId" class="col-sm-2 control-label"><span style="color: red">*</span>投妆类型</label>
+                            <label for="inputCreateTypeId" class="col-sm-2 control-label"><span style="color: red">*</span>订单类型</label>
                             <div class="col-sm-10">
-                                <select name="orderTypeId" id="inputCreateOrderTypeId" class="form-control input-width">
-                                    <option value="0">--请选择投妆类型--</option>
-                                    <option th:each="orderType : ${T(com.example.express.domain.enums.OrderTypeEnum).values()}"
-                                            th:value="${orderType.value}"
-                                            th:text="${orderType.code}"></option>
+                                <select name="typeId" id="inputCreateTypeId" class="form-control input-width">
+                                    <option value="0">--请选择订单类型--</option>
+<!--                                    <option th:each="orderType : ${T(com.example.express.domain.enums.OrderTypeEnum).values()}"-->
+<!--                                            th:value="${orderType.value}"-->
+<!--                                            th:text="${orderType.code}"></option>-->
                                 </select>
                             </div>
                         </div>
@@ -338,7 +338,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="inputInfoOrderType" class="col-sm-2 control-label">投妆类型</label>
+                            <label for="inputInfoOrderType" class="col-sm-2 control-label">订单类型</label>
                             <div class="col-sm-10">
                                 <p class="form-control-static" id="inputInfoOrderType"></p>
                             </div>
@@ -455,12 +455,6 @@
     <script th:src="@{/assets/js/star-rating.min.js}" src="../../static/assets/js/star-rating.min.js"></script>
     <script>
         $(function () {
-            // 表单验证器的初始化
-            initializeCreateFormValidation();
-            // 将提交订单按钮绑定到提交函数
-            $("#submitOrderBtn").click(function () {
-                createCheck(); // 调用表单验证和提交逻辑
-            });
 
             $("#orderPool-sidebar").addClass('active');
 
@@ -488,6 +482,16 @@
                 },
                 hoverOnClear: false
             });
+
+            // 表单验证器的初始化
+            initializeCreateFormValidation();
+            // 将提交订单按钮绑定到提交函数
+            $("#submitOrderBtn").click(function () {
+                createCheck(); // 调用表单验证和提交逻辑
+            });
+
+            // 调用加载订单类型数据的函数
+            loadOrderTypeData();
         });
 
 

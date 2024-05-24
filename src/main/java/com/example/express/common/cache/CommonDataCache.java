@@ -1,15 +1,9 @@
 package com.example.express.common.cache;
 
-import com.example.express.domain.bean.DataArea;
-import com.example.express.domain.bean.DataCompany;
-import com.example.express.domain.bean.DataSchool;
-import com.example.express.domain.bean.UserEvaluate;
+import com.example.express.domain.bean.*;
 import com.example.express.domain.enums.NewOrderStatusEnum;
 import com.example.express.domain.enums.PlatformsEnum;
-import com.example.express.service.DataAreaService;
-import com.example.express.service.DataCompanyService;
-import com.example.express.service.DataSchoolService;
-import com.example.express.service.UserEvaluateService;
+import com.example.express.service.*;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +28,8 @@ public class CommonDataCache {
     private DataCompanyService dataCompanyService;
     @Autowired
     private UserEvaluateService userEvaluateService;
+    @Autowired
+    private DataOrderTypeService dataOrderTypeService;
 
     /**
      * 行政区域数据缓存
@@ -55,6 +51,12 @@ public class CommonDataCache {
      * key: 用户ID
      */
     public static LoadingCache<String, String> userScoreCache;
+
+    /**
+     * 订单类型缓存
+     * key: 用户ID
+     */
+    public static LoadingCache<Integer, DataOrderType> dataOrderTypeCache;
 
     @PostConstruct
     private void init() {
@@ -80,5 +82,10 @@ public class CommonDataCache {
                     UserEvaluate evaluate = userEvaluateService.getById(id);
                     return evaluate.getScore().toPlainString();
                 });
+
+        dataOrderTypeCache = Caffeine.newBuilder()
+                .maximumSize(35)
+                .expireAfterWrite(1, TimeUnit.MINUTES)
+                .build(typeId -> dataOrderTypeService.getById(typeId));
     }
 }

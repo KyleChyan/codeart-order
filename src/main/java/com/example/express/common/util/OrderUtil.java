@@ -1,14 +1,8 @@
 package com.example.express.common.util;
 
 
-import com.example.express.domain.bean.TypeOrder;
-import com.example.express.domain.vo.req.OrderItemReq;
-import com.example.express.service.TypeOrderService;
-
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.Random;
 
 /**
@@ -20,7 +14,7 @@ import java.util.Random;
 public class OrderUtil {
 
 
-    private static TypeOrderService typeOrderService;
+//    private static TypeOrderService typeOrderService;
 
     /**    时间戳模板 yyyyMMddHHmm   */
     public static final String PATTERN= "yyyyMMddHHmm";
@@ -59,16 +53,16 @@ public class OrderUtil {
     /**
      * 获取子订单价格（仅定金）
      */
-    public static double getItemPrice(OrderItemReq req) {
-        TypeOrder typeOrder = typeOrderService.getTypeOrderDetailById(req.getOrderTypeId());
-        return req.getExtraPrice() + typeOrder.getDeposit() * req.getHeadCount();
-    }
+//    public static double getItemPrice(OrderItemReq req) {
+//        OrderType typeOrder = typeOrderService.getTypeOrderDetailById(req.getTypeId());
+//        return req.getExtraPrice() + typeOrder.getDeposit() * req.getHeadCount();
+//    }
 
     /**
      * 获取订单总价格（仅定金）
      */
-    public static double getTotalPrice(OrderItemReq req) {
-        TypeOrder typeOrder = typeOrderService.getTypeOrderDetailById(req.getOrderTypeId());
-        return req.getExtraPrice() + typeOrder.getDeposit() * req.getHeadCount();
-    }
+//    public static double getTotalPrice(OrderItemReq req) {
+//        OrderType typeOrder = typeOrderService.getTypeOrderDetailById(req.getTypeId());
+//        return req.getExtraPrice() + typeOrder.getDeposit() * req.getHeadCount();
+//    }
 }

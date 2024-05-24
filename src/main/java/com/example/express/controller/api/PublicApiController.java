@@ -3,13 +3,11 @@ package com.example.express.controller.api;
 import com.example.express.common.util.StringUtils;
 import com.example.express.domain.ResponseResult;
 import com.example.express.domain.bean.DataCompany;
+import com.example.express.domain.bean.DataOrderType;
 import com.example.express.domain.bean.DataSchool;
 import com.example.express.domain.enums.ResponseErrorCodeEnum;
 import com.example.express.domain.vo.DataAreaVO;
-import com.example.express.service.AipService;
-import com.example.express.service.DataAreaService;
-import com.example.express.service.DataCompanyService;
-import com.example.express.service.DataSchoolService;
+import com.example.express.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +30,8 @@ public class PublicApiController {
     private DataSchoolService dataSchoolService;
     @Autowired
     private DataCompanyService dataCompanyService;
+    @Autowired
+    private DataOrderTypeService dataOrderTypeService;
     @Autowired
     private AipService aipService;
 
@@ -78,6 +78,17 @@ public class PublicApiController {
     public ResponseResult listCompany() {
         dataCompanyService.listAllByCache();
         List<DataCompany> list = dataCompanyService.listAllByCache();
+
+        return ResponseResult.success(list);
+    }
+
+    /**
+     * 读取订单类型
+     */
+    @GetMapping("/orderType")
+    public ResponseResult listOrderType() {
+        dataOrderTypeService.listAllByCache();
+        List<DataOrderType> list = dataOrderTypeService.listAllByCache();
 
         return ResponseResult.success(list);
     }
