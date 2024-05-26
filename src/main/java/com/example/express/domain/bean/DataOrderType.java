@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Data
 public class DataOrderType implements Serializable {
     /**
-     orderId：订单号
+     typeId：类别号
      */
     @TableId(value = "type_id")
     private Integer typeId;
@@ -36,6 +36,16 @@ public class DataOrderType implements Serializable {
      finalPayment：尾款
      */
     private double finalPayment;
+
+    /**
+     normalPeriod：正常工期
+     */
+    private Integer normalPeriod;
+
+    /**
+     urgentPeriod：加急工期
+     */
+    private Integer urgentPeriod;
 
     /**
      remark：备注

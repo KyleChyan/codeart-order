@@ -77,12 +77,29 @@ public class OrderApiController {
         String userId = sysUser.getId();
         StringBuilder sql = new StringBuilder();
 
-        //订单状态筛选
-        if (orderStatus != null&& orderStatus != -1) {
-            if (orderStatus==0){
+        // 默认情况下排除订单完成和订单关闭
+        boolean defaultStatusFilter = (orderStatus == null || orderStatus == -1);
+
+        // 筛选订单状态
+        if (orderStatus != null && orderStatus != -1) {
+            if (orderStatus == 0) {
+                // 如果选择了预订单状态
+                sql.append(" AND orderlist.reserve = true");
+            } else {
+                // 选择了具体的订单状态
+                sql.append(" AND orderlist.order_status = ").append(orderStatus);
+            }
+        } else {
+            // 默认筛选条件，排除订单完成和订单关闭
+            sql.append(" AND orderlist.order_status NOT IN (5, 9)");
+        }
+
+        //不看预订单按钮
+        if (reserve) {
+            if (orderStatus!=null&&orderStatus==0){
                 sql.append(" AND orderlist.reserve = true");
             }else
-                sql.append(" AND orderlist.order_status = ").append(orderStatus);
+                sql.append(" AND orderlist.reserve = false");
         }
 
 //        OrderStatusEnum orderStatusEnum = OrderStatusEnum.getByStatus(StringUtils.toInteger(status, -1));
@@ -126,14 +143,11 @@ public class OrderApiController {
             sql.append(" AND orderlist.create_time < '").append(endCreateTime).append("'");
         }
 
-        System.out.println("预订单的选项是："+reserve);
+        System.out.println("预订单的选项是： AND orderlist.order_status NOT IN(5,9) "+reserve);
 
-        if (reserve) {
-            if (orderStatus!=null&&orderStatus==0){
-                sql.append(" AND orderlist.reserve = true");
-            }else
-                sql.append(" AND orderlist.reserve = false");
-        }
+
+
+
 
         Page page = new Page<>(current, size);
         page.setAsc("create_time");
@@ -156,8 +170,9 @@ public class OrderApiController {
      */
     @GetMapping("/pool/{id}")
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_COURIER') or hasRole('ROLE_ADMIN')")
-    public ResponseResult getOrderDetail(@PathVariable String id,
+    public ResponseResult showOrderDetail(@PathVariable String id,
                                          @AuthenticationPrincipal SysUser sysUser) {
+        System.out.println("当前的orderid是："+id);
         // 权限校验
         switch (sysUser.getRole()) {
             case USER:
@@ -165,18 +180,15 @@ public class OrderApiController {
                     return ResponseResult.failure(ResponseErrorCodeEnum.NO_PERMISSION);
                 }
                 break;
-//            case COURIER:
-//                if(!orderInfoService.isCourierOrder(id, sysUser.getId())) {
-//                    return ResponseResult.failure(ResponseErrorCodeEnum.NO_PERMISSION);
-//                }
-//                break;
+            case COURIER:
+                if(!orderInfoService.isCourierOrder(id, sysUser.getId())) {
+                    return ResponseResult.failure(ResponseErrorCodeEnum.NO_PERMISSION);
+                }
+                break;
             default:
                 break;
         }
 
-        //        if(descVO == null) {
-//            return ResponseResult.failure(ResponseErrorCodeEnum.ORDER_NOT_EXIST);
-//        }
 
         return orderService.getOrderDetailById(id);
     }
@@ -194,7 +206,7 @@ public class OrderApiController {
         int success = 0;
         //校验成功的返回个数
         for(String orderId : orderIds) {
-            ResponseResult result = orderService.delectOrderById(orderId,sysUser.getId());
+            ResponseResult result = orderService.deleteOrderById(orderId,sysUser.getId());
 
             if(result.getCode() != ResponseErrorCodeEnum.SUCCESS.getCode()) {
                 continue;
@@ -226,14 +238,77 @@ public class OrderApiController {
 
 
         // 生成订单
-        ResponseResult result1 = orderService.insertOrder(req,sysUser.getId());
-        if(result1.getCode() != ResponseErrorCodeEnum.SUCCESS.getCode()) {
-            throw new CustomException(result1);
+        ResponseResult result = orderService.insertOrder(req,sysUser.getId());
+        if(result.getCode() != ResponseErrorCodeEnum.SUCCESS.getCode()) {
+            throw new CustomException(result);
         }
-        System.out.println("我得到的ResponseResult是："+result1.getData());
-        return result1;
+        System.out.println("我得到的ResponseResult是："+result.getData());
+        return result;
     }
 
+    /**（ 新！！）
+     * 打开推进订单窗口
+     * - 管理员：任何订单
+     * - 派送员：已接的单
+     * - 用户：个人订单
+     * @author Kyle
+     *
+     */
+    @GetMapping("/push/{id}")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_COURIER') or hasRole('ROLE_ADMIN')")
+    public ResponseResult showPush(@PathVariable String id,
+                                         @AuthenticationPrincipal SysUser sysUser) {
+        // 权限校验
+        switch (sysUser.getRole()) {
+            case USER:
+                if(!orderService.isUserOrder(id, sysUser.getId())) {
+                    return ResponseResult.failure(ResponseErrorCodeEnum.NO_PERMISSION);
+                }
+                break;
+            case COURIER:
+                if(!orderInfoService.isCourierOrder(id, sysUser.getId())) {
+                    return ResponseResult.failure(ResponseErrorCodeEnum.NO_PERMISSION);
+                }
+                break;
+            default:
+                break;
+        }
+
+        return orderService.getOrderDetailById(id);
+    }
+
+    /**（ 新！！）
+     * 推进订单
+     * @param orderId remark
+     * @author Kyle
+     * @since 2018/5/14 8:53
+     */
+    @PostMapping("/push")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_COURIER') or hasRole('ROLE_ADMIN')")
+    public ResponseResult pushOrder(String orderId, String remark,String deliverPostNumber, @AuthenticationPrincipal SysUser sysUser) throws IOException {
+
+
+        ResponseResult result = orderService.pushOrderById(orderId, remark,deliverPostNumber);
+        System.out.println("我得到的ResponseResult是："+result);
+        return result;
+    }
+
+    /**（ 新！！）
+     *  订单异常化
+     * - 管理员：任何订单
+     * - 派送员：已接的单
+     * - 用户：个人订单
+     * @author Kyle
+     *
+     */
+    @PostMapping("/abnormal")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_COURIER') or hasRole('ROLE_ADMIN')")
+    public ResponseResult abnormalOrder(String orderId, String remark,
+                                        @AuthenticationPrincipal SysUser sysUser) {
+        ResponseResult result = orderService.abnormalOrderById(orderId, remark);
+        System.out.println("我得到的ResponseResult是："+result);
+        return result;
+    }
 
 
     /**

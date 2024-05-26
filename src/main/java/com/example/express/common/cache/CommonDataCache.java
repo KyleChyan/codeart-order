@@ -1,19 +1,14 @@
 package com.example.express.common.cache;
 
 import com.example.express.domain.bean.*;
-import com.example.express.domain.enums.NewOrderStatusEnum;
-import com.example.express.domain.enums.PlatformsEnum;
 import com.example.express.service.*;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 

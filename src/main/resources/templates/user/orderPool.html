@@ -34,6 +34,7 @@
                                 <option value="3">施工中</option>
                                 <option value="4">已发货</option>
                                 <option value="5">订单完成</option>
+                                <option value="7">订单异常</option>
                                 <option value="8">退货中</option>
                                 <option value="9">订单关闭</option>
                                 <option value="0">只看预订单</option>
@@ -408,6 +409,87 @@
         </div>
     </div>
 
+    <!-- 推进订单状态模态框 -->
+    <div class="modal fade" id="pushModel" tabindex="-1" role="dialog" aria-labelledby="pushModelLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="pushModelLabel">推进订单？<span id="OrderAbnormalLabel" style="color: red; display: none;">（异常订单）</span></h4>
+                </div>
+                <div class="modal-body">
+                    <h4 style="text-align: center">即将推进订单<span id="inputPushOrderId" style="color: red"></span>，请确认</h4>
+
+                    <form class="form-horizontal">
+                        <input type="hidden" id="inputOrderPush">
+                        <div class="form-group">
+                            <label for="inputPushStatus" class="col-md-2 control-label">当前状态</label>
+                            <div class="col-md-10">
+<!--                                <input id="inputPushStatus" value="5" type="text" data-min=0 data-max=10 data-step=0.5 data-size="md">-->
+                                <p class="form-control-static" id="inputPushStatus"></p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputPushRemark" class="col-sm-2 control-label">订单备注</label>
+                            <div class="col-sm-10">
+                                <textarea class="form-control dis_change_textarea" id="inputPushRemark" rows="5" placeholder="如需要请修改备注"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group" id="inputPushDeliverGroup" style="display: none;">
+                            <label for="inputPushDeliver" class="col-sm-2 control-label">发货单号</label>
+                            <div class="col-sm-10">
+                                <input type="tel" class="form-control input-width" id="inputPushDeliver" placeholder="请输入发货物流单号">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <a style="float: left;color: red;text-decoration: underline;" id="inputAbnormalLink" onclick="showAbnormal()">异常订单？点这里</a>
+                    <button type="button" class="btn btn-primary" onclick="commitPush()">推进</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 异常订单状态模态框 -->
+    <div class="modal fade" id="abnormalModel" tabindex="-1" role="dialog" aria-labelledby="abnormalModelLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="abnormalModelLabel" style="color: red">提交异常订单</h4>
+
+                </div>
+                <div class="modal-body">
+                    <h4 style="text-align: center">订单<span id="inputAbnormalOrderId" style="color: red"></span>将变更为异常订单</h4>
+                    <!-- 公告栏 -->
+                    <div class="alert alert-danger alert-dismissible fade in" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                        <strong>敏感操作！不可撤销！请确认实际情况无误后再提交！</strong>
+                    </div>
+                    <form class="form-horizontal">
+                        <input type="hidden" id="inputOrderAbnormal">
+                        <div class="form-group">
+                            <label for="inputAbnormalStatus" class="col-md-2 control-label">当前状态</label>
+                            <div class="col-md-10">
+                                <p class="form-control-static" id="inputAbnormalStatus"></p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputAbnormalRemark" class="col-sm-2 control-label">订单备注</label>
+                            <div class="col-sm-10">
+                                <textarea class="form-control dis_change_textarea" id="inputAbnormalRemark" rows="5" placeholder="如需要请修改备注"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" onclick="commitAbnormal()">提交</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- 评价模态框 -->
     <div class="modal fade" id="evaluateModel" tabindex="-1" role="dialog" aria-labelledby="evaluateModelLabel">
         <div class="modal-dialog" role="document">
@@ -440,6 +522,9 @@
             </div>
         </div>
     </div>
+
+
+
 
     <script th:src="@{/assets/js/http.js}" src="../../static/assets/js/http.js"></script>
     <script th:src="@{/assets/js/express.js}" src="../../static/assets/js/express.js"></script>

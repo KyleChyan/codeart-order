@@ -2,9 +2,6 @@ package com.example.express.domain.bean;
 
 
 import com.baomidou.mybatisplus.annotation.*;
-import com.example.express.domain.enums.NewOrderStatusEnum;
-import com.example.express.domain.enums.OrderStatusEnum;
-import com.example.express.domain.enums.PlatformsEnum;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +10,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Data
 @NoArgsConstructor

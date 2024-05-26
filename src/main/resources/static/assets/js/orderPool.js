@@ -17,7 +17,13 @@ function loadOrderTypeData() {
         layer.msg("未知错误", { icon: 2 });
     });
 }
-// 初始化订单池表格
+
+// （订单池）刷新订单池表格
+function flushTable() {
+    $("#tb_orderPool").bootstrapTable('refresh',{url : '/api/v1/order/pool'} );
+}
+
+// （订单池）初始化订单池表格
 var TableInit = function () {
     let oTableInit = new Object();
     //初始化Table
@@ -109,64 +115,27 @@ var TableInit = function () {
     return oTableInit;
 };
 
-// 订单详情
-function showDetail(id) {
-    sendJson(HTTP.GET, "/api/v1/order/pool/" + id, null, false, function (res) {
-        if (res.code !== 0) {
-            layer.msg(res.msg,{icon:2});
-        } else {
-            // 初始化模态框信息
-            let data = res.data;
+// （订单池）操作栏的格式化（查看详情，刷新）
+function actionFormatter(value, row, index) {
+    let id = "'" + value + "'";
+    let result = '<button class="btn btn-xs btn-info" onclick="showDetail('+id+')" title="查看"><span class="glyphicon glyphicon-search"></span></button>\n';
+    if (row.orderStatus === 4){
+        result += '<button class="btn btn-xs btn-success" onclick="showPush('+id+')" title="完成订单"><span class="glyphicon glyphicon-ok"></span></button>\n';
+    }else if(row.orderStatus === 2){
+        result += '<button class="btn btn-xs btn-default" style="color: gray" onclick="showPush('+id+')" title="开工"><span class="glyphicon glyphicon-play"></span></button>\n';
+    }else{
+        result += '<button class="btn btn-xs btn-primary" onclick="showPush('+id+')" title="推进订单"><span class="glyphicon glyphicon-check"></span></button>\n';
+    }
 
-            $("#inputInfoOrderId").text(data.orderId);
-            $("#inputInfoClientNickname").text(data.clientNickname);
+    // 订单评价
+    if(row.canScore === "1") {
+        result += '<button class="btn btn-xs btn-default" onclick="showEvaluate('+id+')" title="评价"><span class="glyphicon glyphicon-edit"></span></button>\n';
+    }
 
-            // 使用 orderFormatter 函数格式化下单平台字段
-            let formattedOrderStatus = orderFormatter(data.orderStatus);
-            $("#inputInfoOrderStatus").html(formattedOrderStatus);  // 使用 html() 方法插入格式化后的 HTML 内容
-
-            // 使用 orderFormatter 函数格式化下单平台字段
-            // let formattedOrderType = orderTypeFormatter(data.typeId);
-            // $("#inputInfoOrderType").html(formattedOrderType);  // 使用 html() 方法插入格式化后的 HTML 内容
-            $("#inputInfoOrderType").text(data.typeName);
-            // 使用 platfromFormatter 函数格式化下单平台字段
-            let formattedPlatform = platfromFormatter(data.platform);
-            $("#inputInfoPlatform").html(formattedPlatform);  // 使用 html() 方法插入格式化后的 HTML 内容
-
-            $("#inputInfoHeadName").text(data.headName);
-            $("#inputInfoFen").text(data.fen);
-            $("#inputInfoCount").text(data.count);
-
-            $("#inputInfoName").text(data.deliverName);
-            $("#inputInfoTel").text(data.deliverPhone);
-            $("#inputInfoAddress").text(data.deliverAddress);
-
-            $("#inputInfoReceive").text(data.receivePostNumber);
-            $("#inputInfoDeliver").html('<span style="color: red;">' + data.deliverPostNumber + '</span>');
-            $("#inputInfoDemand").text(data.orderDemand);
-            $("#inputInfoRemark").text(data.remark);
-
-            $("#inputInfoExtraPrice").text(data.extraPrice);
-            $("#inputInfoTotalPrice").text(data.totalPrice);
-
-            $("#inputInfoCreateTime").text(data.createTime);
-            $("#inputInfoDeadlineTime").text(data.deadlineTime);
-
-            // 根据 reserve 字段动态更新预订单提示
-            if (data.reserve) {
-                $("#reserveLabel").show();
-            } else {
-                $("#reserveLabel").hide();
-            }
-
-            $("#infoModel").modal("show");
-        }
-    }, function () {
-        layer.msg("未知错误",{icon:2});
-    });
+    return result;
 }
 
-//初始化按钮（创建订单，撤销订单，删除订单）
+// 初始化按钮（创建订单，撤销订单，删除订单）
 var ButtonInit = function () {
     var oInit = new Object();
 
@@ -238,54 +207,88 @@ var ButtonInit = function () {
 };
 
 
-//操作栏的格式化（查看详情，刷新）
-function actionFormatter(value, row, index) {
-    let id = "'" + value + "'";
-    let result = '<button class="btn btn-xs btn-info" onclick="showDetail('+id+')" title="查看"><span class="glyphicon glyphicon-search"></span></button>\n' +
-        '         <button class="btn btn-xs btn-danger" onclick="refreshStatus('+id+')" title="刷新"><span class="glyphicon glyphicon-refresh"></span></button>\n';
+// 订单详情初始化
+function showDetail(id) {
+    sendJson(HTTP.GET, "/api/v1/order/pool/" + id, null, false, function (res) {
+        if (res.code !== 0) {
+            layer.msg(res.msg,{icon:2});
+        } else {
+            // 初始化模态框信息
+            let data = res.data;
 
-    // 订单评价
-    if(row.canScore === "1") {
-        result += '<button class="btn btn-xs btn-default" onclick="showEvaluate('+id+')" title="评价"><span class="glyphicon glyphicon-edit"></span></button>\n';
-    }
+            $("#inputInfoOrderId").text(data.orderId);
+            $("#inputInfoClientNickname").text(data.clientNickname);
 
-    return result;
+            // 使用 orderFormatter 函数格式化下单平台字段
+            let formattedOrderStatus = orderFormatter(data.orderStatus);
+            $("#inputInfoOrderStatus").html(formattedOrderStatus);  // 使用 html() 方法插入格式化后的 HTML 内容
+
+            // 使用 orderFormatter 函数格式化下单平台字段
+            // let formattedOrderType = orderTypeFormatter(data.typeId);
+            // $("#inputInfoOrderType").html(formattedOrderType);  // 使用 html() 方法插入格式化后的 HTML 内容
+            $("#inputInfoOrderType").text(data.typeName);
+            // 使用 platfromFormatter 函数格式化下单平台字段
+            let formattedPlatform = platfromFormatter(data.platform);
+            $("#inputInfoPlatform").html(formattedPlatform);  // 使用 html() 方法插入格式化后的 HTML 内容
+
+            $("#inputInfoHeadName").text(data.headName);
+            $("#inputInfoFen").text(data.fen);
+            $("#inputInfoCount").text(data.count);
+
+            $("#inputInfoName").text(data.deliverName);
+            $("#inputInfoTel").text(data.deliverPhone);
+            $("#inputInfoAddress").text(data.deliverAddress);
+
+            $("#inputInfoReceive").text(data.receivePostNumber);
+            $("#inputInfoDeliver").html('<span style="color: red;">' + data.deliverPostNumber + '</span>');
+            $("#inputInfoDemand").text(data.orderDemand);
+            $("#inputInfoRemark").text(data.remark);
+
+            $("#inputInfoExtraPrice").text(data.extraPrice);
+            $("#inputInfoTotalPrice").text(data.totalPrice);
+
+            $("#inputInfoCreateTime").text(data.createTime);
+            $("#inputInfoDeadlineTime").text(data.deadlineTime);
+
+            // 根据 reserve 字段动态更新预订单提示
+            if (data.reserve) {
+                $("#reserveLabel").show();
+            } else {
+                $("#reserveLabel").hide();
+            }
+
+            $("#infoModel").modal("show");
+        }
+    }, function () {
+        layer.msg("未知错误",{icon:2});
+    });
 }
 
-// 订单类型格式化
-function orderTypeFormatter(value, row, index) {
-    if(value === 4)
-        return '<span style="color:red">卸妆</span>';
-    else if (value === 3)
-        return '<span style="color:olivedrab">全指定</span>';
-    else if (value === 2)
-        return '<span style="color:#42afff">半指定</span>';
-    else if (value === 1)
-        return '<span style="color:grey">免费妆</span>';
-}
 
 // 下单平台的格式化
 function platfromFormatter(value, row, index) {
     if(value === 4)
-        return '<span style="color:red">微信</span>';
+        return '<span style="color:olivedrab">微信</span>';
     else if (value === 3)
-        return '<span style="color:olivedrab">小红书</span>';
+        return '<span style="color:red">小红书</span>';
     else if (value === 2)
-        return '<span style="color:#42afff">闲鱼</span>';
+        return '<span style="color: #f5a623">闲鱼</span>';
     else if (value === 1)
-        return '<span style="color:grey">淘宝</span>';
+        return '<span style="color: #EA5200">淘宝</span>';
 }
 
 // 订单状态的格式化订单状态（1-未收到货 2-已收到货未开工 3-施工中 4- 已发货 5-订单完成 8-退货中 9-订单关闭）
 function orderFormatter(value, row, index) {
     if(value === 9)
-        return '<span style="color:red">订单关闭</span>';
+        return '<span style="color:darkred">订单关闭</span>';
     else if (value === 8)
-        return '<span style="color:olivedrab">退货中</span>';
+        return '<span style="color:red">退货中</span>';
+    else if (value === 7)
+        return '<span style="color:red">订单异常</span>';
     else if (value === 5)
-        return '<span style="color:#42afff">订单完成</span>';
+        return '<span style="color:olivedrab">订单完成</span>';
     else if (value === 4)
-        return '<span style="color:grey">已发货</span>';
+        return '<span style="color:olivedrab">已发货</span>';
     else if (value === 3)
         return '<span style="color:#42afff">施工中</span>';
     else if (value === 2)
@@ -296,7 +299,7 @@ function orderFormatter(value, row, index) {
         return '<span style="color:grey"></span>';
 }
 
-// 订单剩余工期的格式化订单状态
+
 // 订单剩余工期的格式化订单状态
 function remainDaysFormatter(value, row, index) {
     if (value >= 15)
@@ -307,6 +310,8 @@ function remainDaysFormatter(value, row, index) {
         return '<span style="color: #f5a623 ">' + value + '</span>';
     else if (value < 3 && value > 0)
         return '<span style="color:red">' + value + '</span>';
+    else if (value===null)
+        return '<span style="color:grey">未开工</span>';
     else
         return '<span style="color:darkred">已超时</span>';
 }
@@ -315,9 +320,9 @@ function remainDaysFormatter(value, row, index) {
 // 加急状态格式化
 function urgentFormatter(value, row, index) {
     if(value)
-        return '<span style="color:red">急</span>';
+        return '<span style="color:red">&nbsp;⭕</span>';
     else
-        return '<span style="color:olivedrab">不</span>';
+        return '<span style="color:olivedrab">&nbsp;❎</span>';
 }
 
 // 支付状态的格式化
@@ -332,10 +337,7 @@ function paymentFormatter(value, row, index) {
         return '<span style="color:grey">支付结束</span>';
 }
 
-// 刷新订单池表格
-function flushTable() {
-    $("#tb_orderPool").bootstrapTable('refresh',{url : '/api/v1/order/pool'} );
-}
+
 
 // 手动更新支付状态
 function refreshStatus(id) {
@@ -356,50 +358,22 @@ function refreshStatus(id) {
     });
 }
 
-// 验证码刷新
+// （验证码）刷新
 function refresh(obj) { obj.src = "/auth/code/getVerifyCode?" + Math.random(); }
-// 验证码鼠标
+// （验证码）鼠标选中更改
 function mouseover(obj) { obj.style.cursor = "pointer"; }
 
-// 评价窗口
-function showEvaluate(id) {
-    $("#inputOrderEvaluate").val(id);
-    $("#evaluateModel").modal('show');
-}
 
-// 新增窗口
+/**
+ * 创建订单（共 4 个函数）
+ * */
+
+// （创建订单）打开新增窗口
 function showCreate() {
     $("#createModel").modal('show');
 }
 
-// 提交评价
-function commitEvaluate() {
-    let orderId = $("#inputOrderEvaluate").val();
-    if (orderId == null || orderId === '') {
-        layer.msg("评分异常，请重试", {icon: 7});
-        $("#evaluateModel").modal('hide');
-        return;
-    }
-
-    let score = $("#inputScore").val(), evaluate = $("#inputEvaluate").val();
-    sendJson(HTTP.POST, "/api/v1/evaluate/order/" + orderId, {"score": score, "evaluate": evaluate}, false, function (res) {
-        if (res.code === 0) {
-            layer.msg("评价完毕！", {icon: 1});
-            $("#evaluateModel").modal('hide');
-            flushTable();
-        } else {
-            layer.msg(res.msg, {icon: 2});
-        }
-    }, function () {
-        layer.msg("未知错误", {icon: 2});
-    });
-}
-
-/**
- * 创建订单（共 3 个函数）
- * */
-
-// 创建表单验证器初始化
+// （创建订单）创建表单验证器初始化
 function initializeCreateFormValidation() {
     console.log("Initializing form validation...");
 
@@ -482,7 +456,7 @@ function initializeCreateFormValidation() {
     });
 }
 
-// 提交新增订单
+// （创建订单）提交新增订单
 function commitCreate() {
     // 初始化表单验证器
     initializeCreateFormValidation();
@@ -506,7 +480,7 @@ function commitCreate() {
     }
 }
 
-// 表单提交前的验证
+// （创建订单）表单提交前的验证
 function createCheck() {
     // 初始化创建表单验证器
     initializeCreateFormValidation();
@@ -525,4 +499,111 @@ function createCheck() {
             layer.msg("未知错误", { icon: 2 });
         });
     }
+}
+
+// （推进订单）打开推进订单窗口
+function showPush(id) {
+    sendJson(HTTP.GET, "/api/v1/order/pool/" + id, null, false, function (res) {
+        if (res.code !== 0) {
+            layer.msg(res.msg,{icon:2});
+        } else {
+            let data = res.data;
+            let formattedOrderStatus = orderFormatter(data.orderStatus);
+            $("#inputPushStatus").html(formattedOrderStatus);  // 使用 html() 方法插入格式化后的 HTML 内容
+            $("#inputPushOrderId").text(data.orderId);
+            $("#inputPushRemark").text(data.remark);
+            $("#inputOrderPush").val(id);
+
+            if (data.orderStatus===3 || data.orderStatus===7){
+                $("#inputPushDeliverGroup").show();
+            }else {
+                $("#inputPushDeliverGroup").hide();
+            }
+
+            if (data.orderStatus===7 || data.orderStatus===8 ||data.orderStatus===9){
+                $("#inputAbnormalLink").hide();
+                $("#OrderAbnormalLabel").show();
+            }else {
+                $("#inputAbnormalLink").show();
+                $("#OrderAbnormalLabel").hide();
+            }
+
+            $("#pushModel").modal('show');
+        }
+    }, function () {
+        layer.msg("未知错误",{icon:2});
+    });
+}
+
+// （推进订单）提交推进订单
+function commitPush() {
+    let orderId = $("#inputOrderPush").val();
+    if (orderId == null || orderId === '') {
+        layer.msg("订单推进失败，请重试", {icon: 7});
+        $("#pushModel").modal('hide');
+        return;
+    }
+
+    let pushRemark = $("#inputPushRemark").val();
+    let deliverPostNumber = $("#inputPushDeliver").val();
+    sendJson(HTTP.POST, "/api/v1/order/push", {"orderId": orderId, "remark": pushRemark ,"deliverPostNumber": deliverPostNumber}, false, function (res) {
+        if (res.code === 0) {
+            layer.msg("订单已推进！", {icon: 1});
+            $("#pushModel").modal('hide');
+            flushTable();
+        } else {
+            layer.msg(res.msg, {icon: 2});
+        }
+    }, function () {
+        layer.msg("订单推进失败，未知错误", {icon: 2});
+    });
+}
+
+//获取orderid
+function getOrderIdByPush() {
+    return document.getElementById('inputOrderPush').value;
+}
+
+// （异常订单）打开推进异常订单窗口
+function showAbnormal() {
+    let id = getOrderIdByPush();
+    sendJson(HTTP.GET, "/api/v1/order/pool/" + id, null, false, function (res) {
+        if (res.code !== 0) {
+            layer.msg(res.msg,{icon:2});
+        } else {
+            let data = res.data;
+            let formattedOrderStatus = orderFormatter(data.orderStatus);
+            $("#inputAbnormalStatus").html(formattedOrderStatus);  // 使用 html() 方法插入格式化后的 HTML 内容
+            $("#inputAbnormalOrderId").text(data.orderId);
+            $("#inputAbnormalRemark").text(data.remark);
+            $("#inputOrderAbnormal").val(id);
+            $("#pushModel").modal('hide');
+            $("#abnormalModel").modal('show');
+        }
+    }, function () {
+        layer.msg("未知错误",{icon:2});
+    });
+}
+
+// （异常订单）提交异常订单
+function commitAbnormal() {
+    let orderId = $("#inputOrderAbnormal").val();
+    if (orderId == null || orderId === '') {
+        layer.msg("异常订单提交失败，请重试", {icon: 7});
+        $("#abnormalModel").modal('hide');
+        return;
+    }
+
+    let remark = $("#inputAbnormalRemark").val();
+    sendJson(HTTP.POST, "/api/v1/order/abnormal", {"orderId": orderId, "remark": remark}, false, function (res) {
+        if (res.code === 0) {
+            layer.msg("异常订单提交成功！", {icon: 1});
+            $("#abnormalModel").modal('hide');
+            flushTable();
+        } else {
+            layer.msg(res.msg, {icon: 2});
+        }
+    }, function () {
+        layer.msg("异常订单提交失败，未知错误", {icon: 2});
+    });
 }

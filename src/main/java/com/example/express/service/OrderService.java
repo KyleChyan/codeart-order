@@ -4,18 +4,9 @@ package com.example.express.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.express.domain.ResponseResult;
-import com.example.express.domain.bean.Order;
 import com.example.express.domain.vo.BootstrapTableVO;
 import com.example.express.domain.vo.req.OrderInsertReq;
-import com.example.express.domain.vo.req.OrderItemReq;
-import com.example.express.domain.vo.req.OrderSearchReq;
-import com.example.express.domain.vo.resp.OrderDetailResp;
-import com.example.express.domain.vo.resp.OrderListResp;
-import com.example.express.domain.vo.user.UserOrderDetailVO;
 import com.example.express.domain.vo.user.UserOrderPoolVO;
-import com.example.express.domain.vo.user.UserOrderVO;
-
-import java.util.List;
 
 public interface OrderService {
 
@@ -51,6 +42,13 @@ public interface OrderService {
     Boolean isUserOrder(String orderId, String userId);
 
     /**
+     * 是否是某位courier的订单
+     * @param orderId userId
+     * @date 2019/4/26 0:53
+     */
+    Boolean isCourierOrder(String orderId, String courierId);
+
+    /**
      * 刷新订单状态
      *
      * @param orderId
@@ -64,15 +62,23 @@ public interface OrderService {
      * @param orderId
      * @return
      */
-    ResponseResult delectOrderById(String orderId, String userId);
+    ResponseResult deleteOrderById(String orderId, String userId);
 
     /**
-     * 更新订单信息
+     * 推进订单
      *
-     * @param order
+     * @param orderId, remark
      * @return
      */
-    String updateOrderDetail(Order order);
+    ResponseResult pushOrderById(String orderId, String remark, String deliverPostNumber);
+
+    /**
+     * 订单异常化
+     *
+     * @param orderId, remark
+     * @return
+     */
+    ResponseResult abnormalOrderById(String orderId, String remark);
 
     /**
      * 收货登记/开始施工
