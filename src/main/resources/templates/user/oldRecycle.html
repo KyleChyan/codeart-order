@@ -2,26 +2,13 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>回收站</title>
+    <title>回收站 - Express</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
 
     <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}" href="../../static/assets/css/bootstrap.min.css"/>
     <link rel="stylesheet" th:href="@{/assets/css/bootstrap-table.css}" href="../../static/assets/css/bootstrap-table.css"/>
     <link rel="stylesheet" th:href="@{/assets/css/express.css}" href="../../static/assets/css/express.css"/>
-    <style>
-        html, body {
-            height: 50%;
-            margin: 0;
-            padding: 0;
-        }
-        body {
-            background-image: url('/assets/img/WorkDesk_bg.png');
-            background-size: cover;
-            background-repeat: repeat;
-            background-position: top center; /* 调整位置 */
-        }
-    </style>
 </head>
 <body>
     <div class="container-fluid">
@@ -35,38 +22,27 @@
                 <!-- 筛选条件 -->
                 <div class="panel-heading">
                     <form class="form-inline">
-                        <!-- 订单状态 -->
                         <div class="form-group">
-                            <label for="inputOrderStatus" class="ml10">订单状态</label>
-                            <select id="inputOrderStatus" class="form-control bg-light" placeholder="订单状态">
-                                <option value="-1">订单状态</option>
-                                <option value="1">未收到货</option>
-                                <option value="2">已收到货未开工</option>
-                                <option value="3">施工中</option>
-                                <option value="4">已发货</option>
-                                <option value="5">订单完成</option>
-                                <option value="7">订单异常</option>
-                                <option value="8">退货中</option>
-                                <option value="9">订单关闭</option>
-                                <option value="0">只看预订单</option>
+                            <label for="inputStatus">订单状态</label>
+                            <select id="inputStatus" class="form-control">
+                                <option value=-1>所有状态</option>
+                                <option value=1>等待接单</option>
+                                <option value=2>派送中</option>
+                                <option value=3>订单完成</option>
+                                <option value=4>订单异常</option>
                             </select>
                         </div>
-                        <!-- 收货运单号 -->
                         <div class="form-group">
-                            <label for="inputReceivePostNumber" class="ml10">收货运单号</label>
-                            <input type="text" class="form-control bg-light" id="inputReceivePostNumber" placeholder="收货运单号">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="inputStartDate" class="ml10">起始时间</label>
-                            <input type="date" id="inputStartDate" class="form-control bg-light">
+                            <label for="inputStartDate" class="ml10">起</label>
+                            <input type="date" id="inputStartDate" class="form-control ml10">
+                            <label for="inputEndDate" class="ml10">讫</label>
+                            <input type="date" id="inputEndDate" class="form-control ml10">
                         </div>
                         <div class="form-group">
-                            <label for="inputEndDate" class="ml10">结束时间</label>
-                            <input type="date" id="inputEndDate" class="form-control bg-light">
+                            <label for="inputId">订单号</label>
+                            <input type="text" class="form-control" id="inputId">
                         </div>
-
-                        <button type="button" class="btn btn-info ml10" onclick="flushTable()">查询</button>
+                        <button type="button" class="btn btn-info ml10" onclick="flushTable()">条件查询</button>
                     </form>
                 </div>
                 <div class="panel-body">
@@ -109,7 +85,7 @@
             //初始化Table
             oTableInit.Init = function () {
                 $('#tb_recycle').bootstrapTable({
-                    url: '/api/v1/order/deletePool',          //请求后台的URL（*）
+                    url: '/api/v1/order/list',          //请求后台的URL（*）
                     method: HTTP.GET,                   //请求方式（*）
                     toolbar: '#toolbar',                //工具按钮组id
                     striped: true,                      //是否显示行间隔色
@@ -137,37 +113,33 @@
                     columns: [{
                         checkbox: true
                     }, {
-                        field: 'orderId',
+                        field: 'id',
                         title: '订单号'
                     }, {
-                        field: 'clientNickname',
-                        title: '客户昵称'
+                        field: 'deleteType',
+                        title: '删除原因',
+                        formatter: deleteTypeFormatter
                     }, {
-                        field: 'platform',
-                        title: '下单平台',
-                        formatter: platfromFormatter
+                        field: 'odd',
+                        title: '快递单号'
                     }, {
-                        field: 'typeName',
-                        title: '订单类型'
+                        field: 'company',
+                        title: '快递公司'
+                    }, {
+                        field: 'payment',
+                        title: '支付金额'
+                    }, {
+                        field: 'paymentStatus',
+                        title: '支付状态',
+                        formatter: paymentFormatter
                     }, {
                         field: 'orderStatus',
                         title: '订单状态',
                         formatter: orderFormatter
-                    },{
-                        field: 'urgent',
-                        title: '加急',
-                        formatter: urgentFormatter
-                    },  {
-                        field: 'modifyTime',
-                        title: '删除时间'
-                    }
-                        // , {
-                    //     field: 'orderId',
-                    //     title: '操作',
-                    //     width: 120,
-                    //     formatter: actionFormatter
-                    // }
-                    ]
+                    }, {
+                        field: 'createDate',
+                        title: '下单时间'
+                    }]
                 });
             };
 
@@ -178,12 +150,10 @@
                     current: (params.offset / params.limit) + 1,   //页码
                     type: 1,
                     // 筛选参数
-                    // 筛选参数
-                    orderStatus: $("#inputOrderStatus").val(),
-                    receivePostNumber: $("#inputReceivePostNumber").val(),
-                    startModifyTime: $("#inputStartDate").val(),
-                    endModifyTime:$("#inputEndDate").val(),
-                    isDelete:1,
+                    id: $("#inputId").val(),
+                    status: $("#inputStatus").val(),
+                    startDate: $("#inputStartDate").val(),
+                    endDate:$("#inputEndDate").val(),
                 };
             };
             return oTableInit;
@@ -199,9 +169,8 @@
                     if(row.length > 0) {
                         let ids = new Array();
                         for (let i = 0; i < row.length; i++) {
-                            ids.push(row[i].orderId);
+                            ids.push(row[i].id);
                         }
-                        console.log("ids是："+ids);
                         if (ids.length === 0) {
                             layer.msg("您未选中任何订单",{icon:0});
                             return false;
@@ -209,9 +178,9 @@
                             layer.confirm("是否恢复被选中订单？", {
                                 btn: ['确定','取消']
                             }, function(){
-                                sendArray(HTTP.POST, "/api/v1/order/rollback", {"orderIds": ids}, false, function (res) {
+                                sendArray(HTTP.POST, "/api/v1/order/rollback", {"ids": ids}, false, function (res) {
                                     if(res.code === 0) {
-                                        layer.msg("成功，还原" + res.data.success + "个，失败" + res.data.error + "个",{icon:1});
+                                        layer.msg("成功，撤销" + res.data.success + "个，失败" + res.data.error + "个",{icon:1});
                                         flushTable();
                                     }
                                 }, function () {
@@ -227,47 +196,26 @@
         };
         // 订单状态格式化
         function orderFormatter(value, row, index) {
-            if(value === 9)
-                return '<span style="color:darkred">订单关闭</span>';
-            else if (value === 8)
-                return '<span style="color:red">退货中</span>';
-            else if (value === 7)
-                return '<span style="color:red">订单异常</span>';
-            else if (value === 5)
-                return '<span style="color:olivedrab">订单完成</span>';
-            else if (value === 4)
-                return '<span style="color:olivedrab">已发货</span>';
-            else if (value === 3)
-                return '<span style="color:#42afff">施工中</span>';
-            else if (value === 2)
-                return '<span style="color:grey">已收到货未开工</span>';
-            else if (value === 1)
-                return '<span style="color:grey">未收到货</span>';
-            else if (value === 0)
-                return '<span style="color:grey"></span>';
-        }
-
-
-        // 加急状态格式化
-        function urgentFormatter(value, row, index) {
-            if(value)
-                return '<span style="color:red">&nbsp;⭕</span>';
-            else
-                return '<span style="color:olivedrab">&nbsp;❎</span>';
-        }
-
-        // 下单平台的格式化
-        function platfromFormatter(value, row, index) {
             if(value === 4)
-                return '<span style="color:olivedrab">微信</span>';
+                return '<span style="color:red">订单异常</span>';
             else if (value === 3)
-                return '<span style="color:red">小红书</span>';
+                return '<span style="color:olivedrab">订单完成</span>';
             else if (value === 2)
-                return '<span style="color: #f5a623">闲鱼</span>';
+                return '<span style="color:#42afff">派送中</span>';
             else if (value === 1)
-                return '<span style="color: #EA5200">淘宝</span>';
+                return '<span style="color:grey">等待接单</span>';
         }
-
+        // 支付状态格式化
+        function paymentFormatter(value, row, index) {
+            if(value === 1)
+                return '<span style="color:#f5a623">等待支付</span>';
+            else if (value === 2)
+                return '<span style="color:red">支付关闭</span>';
+            else if (value === 3)
+                return '<span style="color:green">支付成功</span>';
+            else if (value === 4)
+                return '<span style="color:grey">支付结束</span>';
+        }
         // 删除原因格式化
         function deleteTypeFormatter(value, row, index) {
             if(value != null) {
@@ -281,7 +229,7 @@
         }
 
         function flushTable() {
-            $("#tb_recycle").bootstrapTable('refresh',{url : '/api/v1/order/deletePool'} );
+            $("#tb_recycle").bootstrapTable('refresh',{url : '/api/v1/order/list'} );
         }
 
         function showDetail(id) {

@@ -12,6 +12,7 @@ import com.example.express.domain.vo.BootstrapTableVO;
 import com.example.express.domain.vo.OrderDescVO;
 import com.example.express.domain.vo.courier.CourierOrderVO;
 import com.example.express.domain.vo.req.OrderInsertReq;
+import com.example.express.domain.vo.req.OrderUpdateReq;
 import com.example.express.exception.CustomException;
 import com.example.express.service.OrderInfoService;
 import com.example.express.service.OrderService;
@@ -161,13 +162,74 @@ public class OrderApiController {
     }
 
     /**（ 新！！）
-     * 获取订单池详情信息
-     * - 管理员：任何订单
-     * - 派送员：已接的单
-     * - 用户：个人订单
+     * 获取删除订单
+     * - 普通用户：userId = self
+     * - 配送员：courierId = self
+     * - 管理员：无限制
+     * @param isDelete 0:正常订单；1：已删除订单
      * @author Kyle
-     *
+     * @date 2019/4/24 22:21
      */
+    @GetMapping("/deletePool")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_COURIER') or hasRole('ROLE_ADMIN')")
+    public BootstrapTableVO listDeletePool(@RequestParam(required = false, defaultValue = "1") Integer current,
+                                          @RequestParam(required = false, defaultValue = "10") Integer size,
+                                          Integer orderStatus, String receivePostNumber, String startModifyTime, String endModifyTime,Integer isDelete,
+                                          @AuthenticationPrincipal SysUser sysUser) {
+        if (isDelete == -1) {
+            throw new CustomException(ResponseErrorCodeEnum.PARAMETER_ERROR);
+        }
+        String userId = sysUser.getId();
+        StringBuilder sql = new StringBuilder();
+
+        // 筛选订单状态
+        if (orderStatus != null && orderStatus != -1) {
+            if (orderStatus == 0) {
+                // 如果选择了预订单状态
+                sql.append(" AND orderlist.reserve = true");
+            } else {
+                // 选择了具体的订单状态
+                sql.append(" AND orderlist.order_status = ").append(orderStatus);
+            }
+        }
+
+        //收货运单号筛选
+        if(StringUtils.isNotBlank(receivePostNumber)) {
+            if (receivePostNumber.length() == 5) {
+                sql.append(" AND orderlist.receive_post_number like CONCAT('%',").append(receivePostNumber).append(")");
+            }else
+                sql.append(" AND orderlist.receive_post_number = ").append(receivePostNumber);
+        }
+
+        //起始日期筛选
+        if(StringUtils.isNotBlank(startModifyTime)) {
+            sql.append(" AND orderlist.modify_time > '").append(startModifyTime).append("'");
+        }
+
+        if(StringUtils.isNotBlank(endModifyTime)) {
+            sql.append(" AND orderlist.modify_time < '").append(endModifyTime).append("'");
+        }
+
+
+        Page page = new Page<>(current, size);
+        page.setAsc("create_time");
+        switch (sysUser.getRole()) {
+            case USER:
+//                sql.append(" AND info.user_id = '").append(userId).append("'");
+                return orderService.pageUserOrderPoolVO(userId, page, sql.toString(), isDelete);
+            default:
+                return new BootstrapTableVO();
+        }
+    }
+
+        /**（ 新！！）
+         * 获取订单池详情信息
+         * - 管理员：任何订单
+         * - 派送员：已接的单
+         * - 用户：个人订单
+         * @author Kyle
+         *
+         */
     @GetMapping("/pool/{id}")
     @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_COURIER') or hasRole('ROLE_ADMIN')")
     public ResponseResult showOrderDetail(@PathVariable String id,
@@ -224,7 +286,36 @@ public class OrderApiController {
     }
 
     /**（ 新！！）
-     * 提交订单
+     * 删除订单
+     * @param orderIds
+     * @author Kyle
+     * @since 2018/5/14 8:53
+     */
+    @PostMapping("/rollback")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseResult rollbackOrder(String[] orderIds, @AuthenticationPrincipal SysUser sysUser) {
+
+        int success = 0;
+        //校验成功的返回个数
+        for(String orderId : orderIds) {
+            ResponseResult result = orderService.rollbackOrderById(orderId,sysUser.getId());
+
+            if(result.getCode() != ResponseErrorCodeEnum.SUCCESS.getCode()) {
+                continue;
+            }else
+                success++;
+
+            System.out.println("我得到的ResponseResult是："+result.getData());
+        }
+
+        // 返回
+        Map<String, Integer> count = new HashMap<>(16);
+        count.put("success", success);
+        count.put("error", orderIds.length - success);
+        return ResponseResult.success(count);
+    }
+    /**（ 新！！）
+     * 提交新建订单
      * @param req
      * @author Kyle
      * @since 2018/5/14 8:53
@@ -239,6 +330,25 @@ public class OrderApiController {
 
         // 生成订单
         ResponseResult result = orderService.insertOrder(req,sysUser.getId());
+        if(result.getCode() != ResponseErrorCodeEnum.SUCCESS.getCode()) {
+            throw new CustomException(result);
+        }
+        System.out.println("我得到的ResponseResult是："+result.getData());
+        return result;
+    }
+
+    /**（ 新！！）
+     * 提交修改订单
+     * @param req
+     * @author Kyle
+     * @since 2018/5/14 8:53
+     */
+    @PostMapping("/updateSub")
+    @PreAuthorize("hasRole('ROLE_USER') or hasRole('ROLE_COURIER') or hasRole('ROLE_ADMIN')")
+    public ResponseResult subUpdateOrder(OrderUpdateReq req, @AuthenticationPrincipal SysUser sysUser) throws IOException {
+        System.out.println(req);
+        // 生成订单
+        ResponseResult result = orderService.updateOrder(req,sysUser.getId());
         if(result.getCode() != ResponseErrorCodeEnum.SUCCESS.getCode()) {
             throw new CustomException(result);
         }

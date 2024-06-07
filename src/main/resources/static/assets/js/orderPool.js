@@ -119,6 +119,9 @@ var TableInit = function () {
 function actionFormatter(value, row, index) {
     let id = "'" + value + "'";
     let result = '<button class="btn btn-xs btn-info" onclick="showDetail('+id+')" title="查看"><span class="glyphicon glyphicon-search"></span></button>\n';
+
+    result+= '<button class="btn btn-xs btn-warning" onclick="showUpdate('+id+')" title="修改订单"><span class="glyphicon glyphicon-pencil"></span></button>\n';
+
     if (row.orderStatus === 4){
         result += '<button class="btn btn-xs btn-success" onclick="showPush('+id+')" title="完成订单"><span class="glyphicon glyphicon-ok"></span></button>\n';
     }else if(row.orderStatus === 2){
@@ -126,7 +129,6 @@ function actionFormatter(value, row, index) {
     }else{
         result += '<button class="btn btn-xs btn-primary" onclick="showPush('+id+')" title="推进订单"><span class="glyphicon glyphicon-check"></span></button>\n';
     }
-
     // 订单评价
     if(row.canScore === "1") {
         result += '<button class="btn btn-xs btn-default" onclick="showEvaluate('+id+')" title="评价"><span class="glyphicon glyphicon-edit"></span></button>\n';
@@ -258,6 +260,56 @@ function showDetail(id) {
             }
 
             $("#infoModel").modal("show");
+        }
+    }, function () {
+        layer.msg("未知错误",{icon:2});
+    });
+}
+
+// 修改订单初始化
+function showUpdate(id) {
+    sendJson(HTTP.GET, "/api/v1/order/pool/" + id, null, false, function (res) {
+        if (res.code !== 0) {
+            layer.msg(res.msg,{icon:2});
+        } else {
+            // 初始化模态框信息
+            let data = res.data;
+
+            $("#inputUpdateOrderId").val(data.orderId);
+            $("#inputUpdateClientNickname").val(data.clientNickname);
+
+            // 使用 orderFormatter 函数格式化下单平台字段
+            let formattedOrderStatus = orderFormatter(data.orderStatus);
+            $("#inputUpdateOrderStatus").html(formattedOrderStatus);  // 使用 html() 方法插入格式化后的 HTML 内容
+
+            // 使用 orderFormatter 函数格式化下单平台字段
+            // let formattedOrderType = orderTypeFormatter(data.typeId);
+            // $("#inputInfoOrderType").html(formattedOrderType);  // 使用 html() 方法插入格式化后的 HTML 内容
+            $("#inputUpdateOrderType").val(data.typeName);
+
+            $("#inputUpdateHeadName").val(data.headName);
+            $("#inputUpdateFen").val(data.fen);
+            $("#inputUpdateCount").val(data.count);
+
+            $("#inputUpdateName").val(data.deliverName);
+            $("#inputUpdateTel").val(data.deliverPhone);
+            $("#inputUpdateAddress").val(data.deliverAddress);
+
+            $("#inputUpdateReceive").val(data.receivePostNumber);
+
+            $("#inputUpdateDeliver").val(data.deliverPostNumber);
+            $("#inputUpdateDemand").text(data.orderDemand);
+            $("#inputUpdateRemark").text(data.remark);
+
+
+            // 根据 reserve 字段动态更新预订单提示
+            if (data.reserve) {
+                $("#reserveUpdateLabel").show();
+            } else {
+                $("#reserveUpdateLabel").hide();
+            }
+
+            $("#updateModel").modal("show");
         }
     }, function () {
         layer.msg("未知错误",{icon:2});
@@ -559,6 +611,30 @@ function commitPush() {
     });
 }
 
+// （修改订单）提交修改订单
+function commitUpdate() {
+
+    // 初始化表单验证器
+    initializeCreateFormValidation();
+
+    // 验证表单
+    if ($("#orderUpdateForm").valid()) {
+        // 表单验证通过，获取表单数据
+        var formData = $("#orderUpdateForm").serialize();
+        // 表单验证通过，执行提交逻辑
+        sendJson(HTTP.POST, "/api/v1/order/updateSub", formData, false, function (res) {
+            if (res.code === 0) {
+                layer.msg("修改订单成功！", { icon: 1 });
+                $("#updateModel").modal('hide');
+                flushTable();
+            } else {
+                layer.msg(res.msg, { icon: 2 });
+            }
+        }, function () {
+            layer.msg("未知错误", { icon: 2 });
+        });
+    }
+}
 //获取orderid
 function getOrderIdByPush() {
     return document.getElementById('inputOrderPush').value;

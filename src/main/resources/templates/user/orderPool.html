@@ -11,6 +11,19 @@
     <link rel="stylesheet" th:href="@{/assets/css/express.css}" href="../../static/assets/css/express.css"/>
     <link rel="stylesheet" th:href="@{/assets/css/star-rating.min.css}" href="../../static/assets/css/star-rating.min.css"/>
     <link rel="stylesheet" th:href="@{/assets/css/ios-switch.css}" href="../../static/assets/css/ios-switch.css"/>
+    <style>
+        html, body {
+            height: 50%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-image: url('/assets/img/WorkDesk_bg.png');
+            background-size: cover;
+            background-repeat: repeat;
+            background-position: top center; /* 调整位置 */
+        }
+    </style>
 </head>
 <body>
     <div class="container-fluid">
@@ -27,6 +40,7 @@
 
                         <!-- 订单状态 -->
                         <div class="col-md-3 mb-3">
+                            <label>订单状态</label>
                             <select id="inputOrderStatus" class="form-control bg-light" placeholder="订单状态">
                                 <option value="-1">订单状态</option>
                                 <option value="1">未收到货</option>
@@ -43,24 +57,27 @@
 
                         <!-- 订单号 -->
                         <div class="col-md-3 mb-3">
+                            <label>订单号</label>
                             <input type="text" class="form-control bg-light" id="inputOrderId" placeholder="订单号">
                         </div>
 
                         <!-- 客户昵称 -->
                         <div class="col-md-3 mb-3">
+                            <label>客户昵称</label>
                             <input type="text" class="form-control bg-light" id="inputClientNickname" placeholder="客户昵称">
                         </div>
 
-                        <!-- 娃头名称 -->
+                        <!-- 收货运单号 -->
                         <div class="col-md-3 mb-3">
+                            <label>收货运单号</label>
                             <input type="text" class="form-control bg-light" id="inputReceivePostNumber" placeholder="收货运单号">
                         </div>
 
 
                         <!-- 收件人电话 -->
                         <div class="col-md-3 mb-3">
-                            <label>收件人电话</label>
-                            <input type="text" class="form-control bg-light" id="inputDeliverPhone" placeholder="收件人电话">
+                            <label>联系电话</label>
+                            <input type="text" class="form-control bg-light" id="inputDeliverPhone" placeholder="联系电话">
                         </div>
 
                         <!-- 起始时间 -->
@@ -111,12 +128,12 @@
                     <!-- 公告栏 -->
                     <div class="alert alert-danger alert-dismissible fade in" role="alert">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
-                        <strong>重要！</strong> 由于支付宝沙箱环境的不稳定，您支付后订单可能仍处于 【等待支付】 状态，请务必手动点击订单后的同步按钮。【注：仅有支付成功的订单才会被安排配送】
+                        请注意：<strong>客户管理</strong> 和 <strong>订单类型管理 </strong>暂时不可用，如遇到更改价格/修改订单分类/新增订单业务等请咨询管理员
                     </div>
-                    <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                    <div class="alert alert-success alert-dismissible fade in" role="alert">
                         <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
-                        <strong>撤销订单：</strong> 订单状态需为 【等待接单】
-                        <strong>删除订单：</strong> 订单状态需为 【订单完成】 或 【订单异常】
+                        <strong>发货操作:</strong> 订单需在“去发货”功能中填写发货单号，而非“修改订单”功能，以防止数据覆写 &nbsp;
+                        <strong>删除订单：</strong> 删除后不可查看订单详情，且仅可在回收站访问/还原，请谨慎操作
                     </div>
                     <!-- 订单表格 -->
                     <table id="tb_orderPool"></table>
@@ -177,7 +194,7 @@
                         <div class="form-group">
                             <label for="inputCreateCount" class="col-sm-2 control-label"><span style="color: red">*</span>订单数量</label>
                             <div class="col-sm-10">
-                                <input type="number"  class="form-control input-width" id="inputCreateCount" name="count" placeholder="娃头数量" value="1">
+                                <input type="number"  class="form-control input-width" id="inputCreateCount" name="count" placeholder="订单数量" value="1">
                             </div>
                         </div>
                         <div class="form-group">
@@ -404,6 +421,110 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改订单模态框 -->
+    <div class="modal fade" id="updateModel" tabindex="-1" role="dialog" aria-labelledby="updateModelLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="updateModelLabel">修改订单
+                        <span id="reserveUpdateLabel" style="color: red; display: none;">（预订单）</span>
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal"  id="orderUpdateForm">
+                        <div class="form-group">
+                            <label for="inputUpdateOrderId" class="col-sm-2 control-label">订单号</label>
+                            <div class="col-sm-10">
+                                <input type="tel" class="form-control input-width" id="inputUpdateOrderId" name="orderId" placeholder="订单号" readonly>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputUpdateOrderStatus" class="col-sm-2 control-label" >订单状态</label>
+                            <div class="col-sm-10">
+                                <p class="form-control-static" id="inputUpdateOrderStatus"></p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputUpdateClientNickname" class="col-sm-2 control-label">客户昵称</label>
+                            <div class="col-sm-10">
+                                <input type="tel" class="form-control input-width" id="inputUpdateClientNickname" name="clientNickname" placeholder="客户昵称">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputUpdateName" class="col-sm-2 control-label">收件姓名</label>
+                            <div class="col-sm-10">
+                                <input type="tel" class="form-control input-width" id="inputUpdateName" name="deliverName" placeholder="收件姓名">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputUpdateTel" class="col-sm-2 control-label">联系电话</label>
+                            <div class="col-sm-10">
+                                <input type="number" class="form-control input-width" id="inputUpdateTel" name="deliverPhone" placeholder="联系电话">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputUpdateAddress" class="col-sm-2 control-label">寄达地址</label>
+                            <div class="col-sm-10">
+                                <input type="tel" class="form-control input-width" id="inputUpdateAddress" name="deliverAddress" placeholder="寄达地址">
+                            </div>
+                        </div>
+                        <hr><!--分割线-->
+                        <div class="form-group">
+                            <label for="inputUpdateHeadName" class="col-sm-2 control-label">娃头名称</label>
+                            <div class="col-sm-10">
+                                <input type="tel" class="form-control input-width" id="inputUpdateHeadName" name="headName" placeholder="娃头名称">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputUpdateFen" class="col-sm-2 control-label">几分娃头</label>
+                            <div class="col-sm-10">
+                                <input type="tel" class="form-control input-width" id="inputUpdateFen" name="fen" placeholder="几分娃头">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputUpdateCount" class="col-sm-2 control-label">订单数量</label>
+                            <div class="col-sm-10">
+                                <input type="number"  class="form-control input-width" id="inputUpdateCount" name="count" placeholder="订单数量">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputUpdateReceive" class="col-sm-2 control-label">收货物流单号</label>
+                            <div class="col-sm-10">
+                                <input type="tel" class="form-control input-width" id="inputUpdateReceive" name="receivePostNumber" placeholder="请输入修改后的收货物流单号">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputUpdateDeliver" class="col-sm-2 control-label">发货物流单号</label>
+                            <div class="col-sm-10">
+                                <input type="tel" class="form-control input-width" id="inputUpdateDeliver" name="deliverPostNumber" placeholder="请输入修改后的发货物流单号">
+                            </div>
+                        </div>
+                        <hr><!--分割线-->
+                        <div class="form-group">
+                            <label for="inputUpdateDemand" class="col-sm-2 control-label">投妆需求</label>
+                            <div class="col-sm-9">
+                            <textarea class="form-control dis_change_textarea" id="inputUpdateDemand" name="orderDemand" rows="5"
+                                      placeholder="投妆需求"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputUpdateRemark" class="col-sm-2 control-label">备注</label>
+                            <div class="col-sm-9">
+                            <textarea class="form-control dis_change_textarea" id="inputUpdateRemark" name="remark" rows="5"
+                                      placeholder="备注"></textarea>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" onclick="commitUpdate()">提交</button>
                 </div>
             </div>
         </div>

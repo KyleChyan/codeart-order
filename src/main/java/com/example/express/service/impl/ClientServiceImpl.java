@@ -64,14 +64,8 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public ResponseResult updateClientDetail(Client client) {
-        LambdaUpdateWrapper<Client> lambdaUpdateWrapper =new LambdaUpdateWrapper<>();
-        lambdaUpdateWrapper
-                .eq(Client::getClientId,client.getClientId())
-                .set(client.getClientNickname()!=null,Client::getClientNickname,client.getClientNickname())
-                .set(client.getDeliverName()!=null,Client::getDeliverName,client.getClientNickname())
-                .set(client.getDeliverPhone()!=null,Client::getDeliverPhone,client.getDeliverPhone())
-                .set(client.getDeliverAddress()!=null,Client::getDeliverAddress,client.getDeliverAddress());
-        int updated = clientMapper.update(client, lambdaUpdateWrapper);
+
+        int updated = clientMapper.updateById(client);
         if (updated == 0) {
             return ResponseResult.failure(ResponseErrorCodeEnum.CLIENT_ERROR);
         } else if (updated == 1) {

@@ -8,6 +8,19 @@
 
     <link rel="stylesheet" th:href="@{/assets/css/bootstrap.min.css}" href="../../static/assets/css/bootstrap.min.css"/>
     <link rel="stylesheet" th:href="@{/assets/css/express.css}" href="../../static/assets/css/express.css"/>
+    <style>
+        html, body {
+            height: 50%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-image: url('/assets/img/DashBoard_bg.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: top center; /* 调整位置 */
+        }
+    </style>
 </head>
 <body>
     <div class="container-fluid">
@@ -20,7 +33,7 @@
             <div class="col-md-10">
                 <div class="row">
                     <div class="col-md-12 column">
-                        <div class="jumbotron">
+                        <div class="jumbotron bg-light">
                             <h2 th:text="${frontName + '，欢迎登录！'}">欢迎登陆！</h2>
                         </div>
                     </div>
@@ -28,23 +41,27 @@
                 <div class="row">
                     <div class="col-md-4 column">
                         <h3>订单简览</h3>
-                        <p th:text="${orderDesc}">100+</p>
+                        <p>未开始的订单:<span  th:text="${readyCount}"></span>,
+                        施工中的订单:<span  th:text="${buildCount}"></span></p>
+                        <p style="color: red">快到期的订单:<span  th:text="${remainCount}"></span></p>
                         <p>
-                            <a class="btn" href="/user/history">了解更多 »</a>
+                            <a class="btn" href="/user/orderPool">了解更多 »</a>
                         </p>
                     </div>
                     <div class="col-md-4 column">
                         <h3>反馈简览</h3>
                         <p th:text="${feedbackDesc}">100+</p>
                         <p>
-                            <a class="btn" href="/user/feedback">了解更多 »</a>
+                            <a class="btn" href="#" disabled="">暂时不可用</a>
+<!--                            <a class="btn" href="/user/feedback">了解更多 »</a>-->
                         </p>
                     </div>
                     <div class="col-md-4 column">
                         <h3>评价简览</h3>
                         <p th:text="${evaluateDesc}">100+</p>
                         <p>
-                            <a class="btn" href="/user/evaluate">了解更多 »</a>
+                            <a class="btn" href="#" disabled="">暂时不可用</a>
+<!--                            <a class="btn" href="/user/evaluate">了解更多 »</a>-->
                         </p>
                     </div>
                 </div>

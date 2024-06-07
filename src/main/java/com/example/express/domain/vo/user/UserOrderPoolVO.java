@@ -66,4 +66,10 @@ public class UserOrderPoolVO {
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date createTime;
+
+    /**
+     modifyTime：修改（删除时间）
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    private Date modifyTime;
 }

@@ -6,7 +6,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.express.domain.ResponseResult;
 import com.example.express.domain.vo.BootstrapTableVO;
 import com.example.express.domain.vo.req.OrderInsertReq;
+import com.example.express.domain.vo.req.OrderUpdateReq;
 import com.example.express.domain.vo.user.UserOrderPoolVO;
+
+import java.util.Map;
 
 public interface OrderService {
 
@@ -25,6 +28,14 @@ public interface OrderService {
      * @return
      */
     ResponseResult insertOrder(OrderInsertReq req, String uid);
+
+    /**
+     * 新增订单
+     *
+     * @param req
+     * @return
+     */
+    ResponseResult updateOrder(OrderUpdateReq req, String uid);
 
     /**
      * 前端page条件搜索
@@ -81,35 +92,18 @@ public interface OrderService {
     ResponseResult abnormalOrderById(String orderId, String remark);
 
     /**
-     * 收货登记/开始施工
+     * 还原订单（逻辑删除）
      *
-     * @param id
+     * @param orderId
      * @return
      */
-    String startOrder(Integer id);
+    ResponseResult rollbackOrderById(String orderId, String userId);
 
     /**
-     * 施工结束/已经发货
+     * 根据用户获取仪表台数据
      *
-     * @param orderId,deliverPostNumber
+     * @param userId
      * @return
      */
-    String sendOrder(String orderId,String deliverPostNumber);
-
-    /**
-     * 退货
-     *
-     * @param orderId,orderStatus,deliverPostNumber,remark
-     * @return
-     */
-    String returnOrder(String orderId,Integer orderStatus,String deliverPostNumber,String remark);
-
-    /**
-     * 完成订单/关闭订单
-     *
-     * @param orderId,orderStatus
-     * @return
-     */
-    String finishOrder(String orderId,Integer orderStatus);
-
+    Map<String, Integer> getDashboardDataByUser(String userId);
 }

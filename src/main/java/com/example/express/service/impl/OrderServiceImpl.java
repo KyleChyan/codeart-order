@@ -1,7 +1,10 @@
 package com.example.express.service.impl;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.express.common.util.BeanUtil;
@@ -9,9 +12,11 @@ import com.example.express.common.util.OrderUtil;
 import com.example.express.common.util.StringUtils;
 import com.example.express.domain.ResponseResult;
 import com.example.express.domain.bean.*;
+import com.example.express.domain.enums.PaymentStatusEnum;
 import com.example.express.domain.enums.ResponseErrorCodeEnum;
 import com.example.express.domain.vo.BootstrapTableVO;
 import com.example.express.domain.vo.req.OrderInsertReq;
+import com.example.express.domain.vo.req.OrderUpdateReq;
 import com.example.express.domain.vo.user.UserOrderDetailVO;
 import com.example.express.domain.vo.user.UserOrderPoolVO;
 import com.example.express.mapper.OrderItemMapper;
@@ -35,6 +40,10 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService {
@@ -70,7 +79,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             if (order == null) {
                 return ResponseResult.failure(ResponseErrorCodeEnum.ORDER_NOT_EXIST);
             }
-            System.out.println("查询到的order是："+order);
             BeanUtil.copyProperties(order, userOrderDetailVO);
             //设定订单类型名称
             userOrderDetailVO.setTypeName(dataOrderTypeService.getByCache(order.getTypeId()).getTypeName());
@@ -105,7 +113,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     @Override
     public ResponseResult insertOrder(OrderInsertReq req, String uid) {
         try {
-            System.out.println(req);
             //初始化方法所需的变量
             DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
             TransactionStatus status = transactionManager.getTransaction(definition);
@@ -194,6 +201,37 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
+    public ResponseResult updateOrder(OrderUpdateReq req, String uid) {
+        DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+        TransactionStatus status = transactionManager.getTransaction(definition);
+        Order order = new Order();
+        LocalDateTime nowTime = LocalDateTime.now();
+        if (req.getClientNickname() != null || req.getDeliverPhone() != null
+                || req.getDeliverName() != null || req.getDeliverAddress() != null) {
+            Client client = new Client();
+            Order selectById = orderMapper.selectById(req.getOrderId());
+            Client clientDetailById = clientService.getClientDetailById(selectById.getClientId());
+            BeanUtil.copyProperties(req, client);
+            client.setClientId(clientDetailById.getClientId());
+            clientService.updateClientDetail(client);
+        }
+        BeanUtil.copyProperties(req, order);
+
+        if (Objects.equals(order.getDeliverPostNumber(), "☆ 未寄出 ☆")) {
+            order.setDeliverPostNumber(null);
+        }
+        order.setModifyTime(nowTime);
+        int updated = orderMapper.updateById(order);
+        if (updated == 1) {
+            transactionManager.commit(status);
+            return ResponseResult.success(order.getOrderId());
+        }else{
+            transactionManager.rollback(status);
+            return ResponseResult.failure(ResponseErrorCodeEnum.ORDER_ERROR);
+        }
+    }
+
+    @Override
     public BootstrapTableVO<UserOrderPoolVO> pageUserOrderPoolVO(String userId, Page<UserOrderPoolVO> page, String sql, int isDelete) {
         BootstrapTableVO<UserOrderPoolVO> vo = new BootstrapTableVO<>();
         IPage<UserOrderPoolVO> selectPage = orderMapper.pageUserOrderVO(page, sql, isDelete);
@@ -262,6 +300,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
             Order order = getById(orderId);
             order.setOrderDeleted(1);
+            order.setModifyTime(LocalDateTime.now());
             deleted = orderMapper.updateById(order);
             //失败回滚
             if (deleted == 0) {
@@ -305,6 +344,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             Integer orderStatus = order.getOrderStatus();
             Integer newStatus = orderStatus+1;
             order.setOrderStatus(newStatus);
+            order.setModifyTime(nowTime);
             order.setRemark(remark);
 
             int updated = orderMapper.updateById(order);
@@ -333,6 +373,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 return ResponseResult.failure(ResponseErrorCodeEnum.ORDER_NOT_EXIST);
             }
             order.setOrderStatus(ABNORMAL_ID);
+            order.setModifyTime(LocalDateTime.now());
             order.setRemark(remark);
             int updated = orderMapper.updateById(order);
             //失败回滚
@@ -348,24 +389,68 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     }
 
     @Override
-    public String startOrder(Integer id) {
-        return null;
+    public ResponseResult rollbackOrderById(String orderId, String userId) {
+        try {
+            //初始化方法所需的变量
+            DefaultTransactionDefinition definition = new DefaultTransactionDefinition();
+            TransactionStatus status = transactionManager.getTransaction(definition);
+            int rollBacked=0;
+
+            Order order = getById(orderId);
+            order.setOrderDeleted(0);
+            order.setModifyTime(LocalDateTime.now());
+            rollBacked = orderMapper.updateById(order);
+            //失败回滚
+            if (rollBacked == 0) {
+                transactionManager.rollback(status);
+                return ResponseResult.failure(ResponseErrorCodeEnum.ORDER_ERROR);
+            }
+
+            transactionManager.commit(status);
+            return ResponseResult.success(orderId);
+        } catch (TransactionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    public String sendOrder(String orderId, String deliverPostNumber) {
-        return null;
+    public Map<String, Integer> getDashboardDataByUser(String userId) {
+        Map<String, Integer> map = new HashMap<>();
+        // 施工中的订单
+        LambdaQueryWrapper<Order> buildWrapper = Wrappers.lambdaQuery();
+        buildWrapper.eq(Order::getUserId, userId)
+                .eq(Order::getOrderDeleted, 0)
+                .eq(Order::getOrderStatus, 3);
+        Integer buildCount = orderMapper.selectCount(buildWrapper);
+
+        // 未开工的订单
+        LambdaQueryWrapper<Order> readyWrapper = Wrappers.lambdaQuery();
+        readyWrapper.eq(Order::getUserId, userId)
+                .eq(Order::getOrderDeleted, 0)
+                .and(wrapper -> wrapper.eq(Order::getOrderStatus, 1)
+                        .or()
+                        .eq(Order::getOrderStatus, 2));
+        Integer readyCount = orderMapper.selectCount(readyWrapper);
+
+        // 获取所有相关订单
+        LambdaQueryWrapper<Order> allOrdersWrapper = Wrappers.lambdaQuery();
+        allOrdersWrapper.eq(Order::getUserId, userId)
+                .eq(Order::getOrderDeleted, 0);
+        List<Order> orderList = orderMapper.selectList(allOrdersWrapper);
+
+        // 计算将超时的订单(>=7天)
+        Integer remainCount = 0;
+        for (Order order : orderList) {
+            Integer remainDays = this.flushOrderStatus(order.getOrderId());
+            if (remainDays <= 7 && order.getOrderStatus() <= 3 && order.getOrderStatus() > 0) {
+                remainCount++;
+            }
+        }
+
+        map.put("readyCount", readyCount);
+        map.put("buildCount", buildCount);
+        map.put("remainCount", remainCount);
+
+        return map;
     }
-
-    @Override
-    public String returnOrder(String orderId, Integer orderStatus, String deliverPostNumber, String remark) {
-        return null;
-    }
-
-    @Override
-    public String finishOrder(String orderId, Integer orderStatus) {
-        return null;
-    }
-
-
 }

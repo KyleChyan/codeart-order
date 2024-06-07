@@ -36,6 +36,35 @@ public class UserPageController {
     private OrderEvaluateService orderEvaluateService;
     @Autowired
     private DataCompanyService dataCompanyService;
+    @Autowired
+    private OrderService orderService;
+
+//    /**
+//     * 仪表盘页面(已弃用)
+//     */
+//    @RequestMapping("/dashboard")
+//    public String showDashboardPage(@AuthenticationPrincipal SysUser sysUser, ModelMap map) {
+//        map.put("frontName", sysUserService.getFrontName(sysUser));
+//
+//        String score = userEvaluateService.getScoreFromCache(sysUser.getId());
+//        int evaluateCount = orderEvaluateService.countEvaluate(sysUser.getId(), SysRoleEnum.USER);
+//
+//        String userDesc = "您共收到：" + evaluateCount + "条评价，您的综合评分为：" + score + "分";
+//        map.put("evaluateDesc", userDesc);
+//
+//        Map<String, Integer> data1 = orderInfoService.getUserDashboardData(sysUser.getId());
+//        String orderDesc = "未支付订单数：：" + data1.get("waitPayment") +
+//                "，等待接单数：：" + data1.get("wait") +
+//                "，正在派送数：" + data1.get("transport");
+//        map.put("orderDesc", orderDesc);
+//
+//        Map<String, Integer> data2 = feedbackService.getUserDashboardData(sysUser.getId());
+//        String feedbackDesc = "正在处理的反馈数：" + data2.get("process") +
+//                "，未处理的反馈数：" + data2.get("wait");
+//        map.put("feedbackDesc", feedbackDesc);
+//
+//        return "user/dashboard";
+//    }
 
     /**
      * 仪表盘页面
@@ -43,23 +72,10 @@ public class UserPageController {
     @RequestMapping("/dashboard")
     public String showDashboardPage(@AuthenticationPrincipal SysUser sysUser, ModelMap map) {
         map.put("frontName", sysUserService.getFrontName(sysUser));
-
-        String score = userEvaluateService.getScoreFromCache(sysUser.getId());
-        int evaluateCount = orderEvaluateService.countEvaluate(sysUser.getId(), SysRoleEnum.USER);
-
-        String userDesc = "您共收到：" + evaluateCount + "条评价，您的综合评分为：" + score + "分";
-        map.put("evaluateDesc", userDesc);
-
-        Map<String, Integer> data1 = orderInfoService.getUserDashboardData(sysUser.getId());
-        String orderDesc = "未支付订单数：：" + data1.get("waitPayment") +
-                "，等待接单数：：" + data1.get("wait") +
-                "，正在派送数：" + data1.get("transport");
-        map.put("orderDesc", orderDesc);
-
-        Map<String, Integer> data2 = feedbackService.getUserDashboardData(sysUser.getId());
-        String feedbackDesc = "正在处理的反馈数：" + data2.get("process") +
-                "，未处理的反馈数：" + data2.get("wait");
-        map.put("feedbackDesc", feedbackDesc);
+        Map<String, Integer> data = orderService.getDashboardDataByUser(sysUser.getId());
+        map.put("readyCount", data.get("readyCount"));
+        map.put("buildCount", data.get("buildCount"));
+        map.put("remainCount", data.get("remainCount"));
 
         return "user/dashboard";
     }

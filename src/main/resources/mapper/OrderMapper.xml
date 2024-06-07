@@ -12,7 +12,8 @@
             orderlist.urgent,
             orderlist.total_price,
             orderlist.deadline_time,
-            orderlist.create_time
+            orderlist.create_time,
+            orderlist.modify_time
         FROM
             od_order AS orderlist, od_client AS client
         WHERE
