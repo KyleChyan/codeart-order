@@ -77,5 +77,5 @@ project:
 server:
   port: 9001
   # 公网暴露 IP
-  addr: http://127.0.0.1:${server.port}
+  addr: http://192.168.124.4:${server.port}
   max-http-header-size: 8192
