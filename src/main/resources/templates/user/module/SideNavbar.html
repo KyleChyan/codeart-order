@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-cn" xmlns:th="http://www.thymeleaf.org">
+    <!-- Side Navbar -->
+    <nav class="side-navbar nav-pills nav-stacked" id="nav" th:fragment="html">
+        <div class="sidebar-header d-flex align-items-center">
+
+        </div>
+        <!-- Sidebar Navidation Menus-->
+        <span class="heading">Main</span>
+        <ul class="list-unstyled">
+<!--            <li class="active"><a href="index.html"> <i class="icon-home"></i>Home </a></li>-->
+            <li id="newDashboard-sidebar"><a href="/user/newDashboard"><i class="bi bi-speedometer2"></i>新仪表盘</a></li>
+            <li id="dashboard-sidebar"><a href="/user/dashboard"><i class="icon-home"></i>仪表盘</a></li>
+<!--            <li><a href="#exampledropdownDropdown" aria-expanded="false" data-toggle="collapse"> <i class="icon-interface-windows"></i>Example dropdown </a>-->
+<!--                <ul id="exampledropdownDropdown" class="collapse list-unstyled ">-->
+<!--                    <li><a href="#">Page</a></li>-->
+<!--                    <li><a href="#">Page</a></li>-->
+<!--                    <li><a href="#">Page</a></li>-->
+<!--                </ul>-->
+<!--            </li>-->
+        </ul>
+        <!--订单管理-->
+        <span class="heading">订单管理</span>
+        <ul class="list-unstyled">
+            <li id="orderPool-sidebar"><a href="/user/orderPool"><i class="bi bi-clipboard2-check"></i>订单池</a></li>
+            <li> <a href="#"><i class="bi bi-cart-check"></i>套餐调整</a></li>
+            <li> <a href="#"><i class="bi bi-graph-up"></i></i>财务统计</a></li>
+            <li id="recycle-sidebar"><a href="/user/recycle"><i class="bi bi-trash"></i>回收站</a></li>
+        </ul>
+        <span class="heading">客户维护</span>
+        <ul class="list-unstyled">
+            <li id="client-sidebar" class="disabled"><a href="#"><i class="bi bi-person-rolodex"></i>客户池</a></li>
+        </ul>
+        <span class="heading">用户管理</span>
+        <ul class="list-unstyled">
+            <li id="log-sidebar" class="disabled"><a href="#">操作日志<i class="glyphicon glyphicon-list-alt pull-right"></i></a></li>
+            <li id="info-sidebar"><a href="/user/info"><i class="bi bi-person-vcard"></i>个人中心</a></li>
+        </ul>
+
+<!--        <span class="heading">Extras</span>-->
+<!--        <ul class="list-unstyled">-->
+<!--            <li> <a href="#"> <i class="bi bi-people-fill"></i>Demo </a></li>-->
+<!--            <li> <a href="#"> <i class="icon-screen"></i>Demo </a></li>-->
+<!--            <li> <a href="#"> <i class="icon-mail"></i>Demo </a></li>-->
+<!--            <li> <a href="#"> <i class="icon-picture"></i>Demo </a></li>-->
+<!--        </ul>-->
+    </nav>
+</html>

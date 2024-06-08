@@ -1,6 +1,7 @@
 package com.example.express.controller.user;
 
 import com.example.express.common.constant.SessionKeyConstant;
+import com.example.express.domain.bean.Order;
 import com.example.express.domain.bean.OrderInfo;
 import com.example.express.domain.bean.SysUser;
 import com.example.express.domain.enums.SysRoleEnum;
@@ -14,7 +15,9 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpSession;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
 
 /**
  * 普通用户页面 Controller
@@ -78,6 +81,68 @@ public class UserPageController {
         map.put("remainCount", data.get("remainCount"));
 
         return "user/dashboard";
+    }
+
+    /**
+     * 仪表盘页面
+     */
+    @RequestMapping("/newDashboard")
+    public String shownewDashboard(@AuthenticationPrincipal SysUser sysUser, ModelMap map) {
+        map.put("frontName", sysUserService.getFrontName(sysUser));
+        Map<String, Integer> data = orderService.getDashboardDataByUser(sysUser.getId());
+
+        List<Order> dailyRevenueList = orderService.getMonthListByUser(sysUser.getId());
+        List<Double> monthSalesRevenue = orderService.getMonthlySalesRevenueByUser(sysUser.getId());
+        Double dealProportion = orderService.flushProportion(sysUser.getId());
+
+        // 创建一个从本月第一天到当前日期的日期列表
+        List<LocalDate> dates = new ArrayList<>();
+        LocalDate currentDate = LocalDate.now();
+        LocalDate firstDayOfMonth = LocalDate.of(currentDate.getYear(), currentDate.getMonth(), 1);
+        for (LocalDate date = firstDayOfMonth; !date.isAfter(currentDate); date = date.plusDays(1)) {
+            dates.add(date);
+        }
+
+        // 初始化每日销售额和销售量为0
+        Map<LocalDate, Double> dailySalesRevenueMap = new TreeMap<>();
+        Map<LocalDate, Integer> dailySalesCountMap = new TreeMap<>();
+        for (LocalDate date : dates) {
+            dailySalesRevenueMap.put(date, 0.0);
+            dailySalesCountMap.put(date, 0);
+        }
+
+        // 遍历本月的订单列表
+        for (Order order : dailyRevenueList) {
+            // 获取订单的创建时间
+            LocalDateTime createTime = order.getCreateTime();
+            // 从订单创建时间中提取日期（年月日）
+            LocalDate createDate = createTime.toLocalDate();
+
+            // 更新销售额
+            double totalRevenue = dailySalesRevenueMap.get(createDate) + order.getTotalPrice();
+            dailySalesRevenueMap.put(createDate, totalRevenue);
+
+            // 更新销售量
+            int totalCount = dailySalesCountMap.get(createDate) + 1;
+            dailySalesCountMap.put(createDate, totalCount);
+        }
+
+        // 将每日销售额和销售量转换为列表
+        List<Double> daySalesRevenue = new ArrayList<>(dailySalesRevenueMap.values());
+        List<Integer> daySalesCount = new ArrayList<>(dailySalesCountMap.values());
+
+
+        System.out.println("salesRevenue"+ daySalesRevenue+",,salesCount"+daySalesCount+",,monthSalesRevenue"+monthSalesRevenue);
+        map.put("readyCount", data.get("readyCount"));
+        map.put("buildCount", data.get("buildCount"));
+        map.put("remainCount", data.get("remainCount"));
+        map.put("monthCount", data.get("monthCount"));
+        map.put("daySalesRevenue", daySalesRevenue);
+        map.put("daySalesCount", daySalesCount);
+        map.put("monthSalesRevenue", monthSalesRevenue);
+        map.put("dealProportion", dealProportion);
+
+        return "user/newDashboard";
     }
     /**
      * 下单页面

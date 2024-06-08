@@ -75,7 +75,8 @@ project:
 
 # 服务启动
 server:
-  port: 9001
+  port: 8080
+#  port: 9001
   # 公网暴露 IP
   addr: http://192.168.124.4:${server.port}
   max-http-header-size: 8192

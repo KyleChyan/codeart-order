@@ -4,11 +4,13 @@ package com.example.express.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.express.domain.ResponseResult;
+import com.example.express.domain.bean.Order;
 import com.example.express.domain.vo.BootstrapTableVO;
 import com.example.express.domain.vo.req.OrderInsertReq;
 import com.example.express.domain.vo.req.OrderUpdateReq;
 import com.example.express.domain.vo.user.UserOrderPoolVO;
 
+import java.util.List;
 import java.util.Map;
 
 public interface OrderService {
@@ -106,4 +108,38 @@ public interface OrderService {
      * @return
      */
     Map<String, Integer> getDashboardDataByUser(String userId);
+
+    /**
+     * 根据用户获取当月所有订单
+     *
+     * @param userId
+     * @return
+     */
+    List<Order> getMonthListByUser(String userId);
+
+    /**
+     * 根据用户获取当年所有订单
+     *
+     * @param userId
+     * @return
+     */
+    List<Order> getYearListByUser(String userId);
+
+    /**
+     * 获取当年的月销售额
+     *
+     * @param userId
+     * @return
+     */
+    List<Double> getMonthlySalesRevenueByUser(String userId);
+
+    /**
+     * 刷新交易成功比率
+     *
+     * @param userId
+     * @return
+     */
+    Double flushProportion(String userId);
+
+
 }

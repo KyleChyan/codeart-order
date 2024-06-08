@@ -40,10 +40,8 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 
 @Service
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService {
@@ -432,7 +430,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                         .eq(Order::getOrderStatus, 2));
         Integer readyCount = orderMapper.selectCount(readyWrapper);
 
-        // 获取所有相关订单
+        // 获取所有未删除订单
         LambdaQueryWrapper<Order> allOrdersWrapper = Wrappers.lambdaQuery();
         allOrdersWrapper.eq(Order::getUserId, userId)
                 .eq(Order::getOrderDeleted, 0);
@@ -442,15 +440,119 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Integer remainCount = 0;
         for (Order order : orderList) {
             Integer remainDays = this.flushOrderStatus(order.getOrderId());
-            if (remainDays <= 7 && order.getOrderStatus() <= 3 && order.getOrderStatus() > 0) {
+            if (remainDays != null && remainDays <= 7 && order.getOrderStatus() <= 3 && order.getOrderStatus() > 0) {
                 remainCount++;
             }
         }
 
+        // 获取本月第一天的开始时间和当前时间
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime firstDayOfMonth = now.with(TemporalAdjusters.firstDayOfMonth()).toLocalDate().atStartOfDay();
+        // 创建查询条件
+        LambdaQueryWrapper<Order> thisMonthWrapper = Wrappers.lambdaQuery();
+        thisMonthWrapper.eq(Order::getUserId, userId)
+                .eq(Order::getOrderDeleted, 0)
+                .ge(Order::getCreateTime, firstDayOfMonth)
+                .le(Order::getCreateTime, now);
+
+        // 获取本月订单数量
+        Integer monthCount = orderMapper.selectCount(thisMonthWrapper);
+
         map.put("readyCount", readyCount);
         map.put("buildCount", buildCount);
         map.put("remainCount", remainCount);
+        map.put("monthCount", monthCount);
 
         return map;
     }
+
+    @Override
+    public List<Order> getMonthListByUser(String userId) {
+        /*
+         * 获取当月图表数据
+         * */
+
+        // 获取本月第一天的开始时间和当前时间
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime firstDayOfMonth = now.with(TemporalAdjusters.firstDayOfMonth()).toLocalDate().atStartOfDay();
+        // 创建查询条件
+        LambdaQueryWrapper<Order> thisMonthWrapper = Wrappers.lambdaQuery();
+        thisMonthWrapper.eq(Order::getUserId, userId)
+                .eq(Order::getOrderDeleted, 0)
+                .ge(Order::getCreateTime, firstDayOfMonth)
+                .le(Order::getCreateTime, now)
+                .orderByDesc(Order::getCreateTime);
+
+        // 获取所有本月订单
+        return orderMapper.selectList(thisMonthWrapper);
+    }
+
+    @Override
+    public List<Order> getYearListByUser(String userId) {
+        // 获取今年的第一天的开始时间和当前时间
+        LocalDate today = LocalDate.now();
+        LocalDateTime firstDayOfYear = today.withDayOfYear(1).atStartOfDay();
+        // 创建查询条件
+        LambdaQueryWrapper<Order> thisYearWrapper = Wrappers.lambdaQuery();
+        thisYearWrapper.eq(Order::getUserId, userId)
+                .eq(Order::getOrderDeleted, 0)
+                .ge(Order::getCreateTime, firstDayOfYear)
+                .le(Order::getCreateTime, today.atStartOfDay().plusDays(1))
+                .orderByDesc(Order::getCreateTime);
+
+        // 获取今年到今天的所有订单
+        return orderMapper.selectList(thisYearWrapper);
+    }
+
+    public List<Double> getMonthlySalesRevenueByUser(String userId) {
+        List<Order> yearToDateOrders = getYearListByUser(userId);
+
+        // 初始化每个月的销售额为0
+        Map<Integer, Double> monthlySalesRevenueMap = new HashMap<>();
+        for (int i = 1; i <= LocalDate.now().getMonthValue(); i++) {
+            monthlySalesRevenueMap.put(i, 0.0);
+        }
+
+        // 更新每个月的销售额
+        for (Order order : yearToDateOrders) {
+            LocalDateTime createTime = order.getCreateTime();
+            int month = createTime.getMonthValue();
+            double totalPrice = order.getTotalPrice();
+            monthlySalesRevenueMap.put(month, monthlySalesRevenueMap.get(month) + totalPrice);
+        }
+
+        // 将每个月的销售额添加到列表中
+        List<Double> monthlySalesRevenue = new ArrayList<>(monthlySalesRevenueMap.values());
+
+        return monthlySalesRevenue;
+    }
+
+    @Override
+    public Double flushProportion(String userId) {
+        // 获取交易成功的订单数量
+        LambdaQueryWrapper<Order> successDealWrapper = Wrappers.lambdaQuery();
+        successDealWrapper.eq(Order::getUserId, userId)
+                .eq(Order::getOrderDeleted, 0)
+                .eq(Order::getOrderStatus,5);
+        Integer successCount = orderMapper.selectCount(successDealWrapper);
+        // 获取交易失败的订单数量
+        LambdaQueryWrapper<Order> failedDealWrapper = Wrappers.lambdaQuery();
+        failedDealWrapper.eq(Order::getUserId, userId)
+                .eq(Order::getOrderDeleted, 0)
+                .in(Order::getOrderStatus,7,8,9);
+        Integer failedCount = orderMapper.selectCount(failedDealWrapper);
+
+        Double percentage = 0.0;
+        //
+        if (failedCount == 0 && successCount == 0) {
+            return 100.0;
+        } else {
+            //计算交易成功订单百分比
+            percentage = Math.round((double) successCount / (failedCount+successCount) * 100 * 100.0) / 100.0;
+        }
+
+        System.out.println("percentage的值是：：：："+percentage);
+        return percentage;
+    }
+
 }
